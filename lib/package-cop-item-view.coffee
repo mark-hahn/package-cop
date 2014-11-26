@@ -14,6 +14,8 @@ class PackageCopItemView extends View
     @div class:'package-cop-item-view', tabIndex:-1, =>
       @div class:'package-cop-help', outlet:'helpTop'
       @div class:'package-cop-help', outlet:'helpMiddle'
+      @div class:'package-cop-help', outlet:'helpAction'
+      @div class:'package-cop-help', outlet:'helpMethodology'
 
   initialize: ->
     helpMD = fs.readFileSync path.join(__dirname, 'help.md'), 'utf8'
