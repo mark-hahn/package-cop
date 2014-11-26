@@ -1,0 +1,14 @@
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Package Cop'
+      'submenu': [
+        {
+          'label': 'open'
+          'command': 'package-cop:open'
+        }
+      ]
+    ]
+  }
+]
