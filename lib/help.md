@@ -1,4 +1,4 @@
-<helpTop>
+<helpProblems>
 ## Package Cop
 
 *This page is the actual application, not just a help page.* You can turn off the help text on this page in the package configuration settings.
@@ -17,7 +17,7 @@ Clicking and selecting one of the problem names also controls what test results 
 
 ***Table of problems goes here**
 
-<helpMiddle>
+<helpPackages>
 
 #### Packages ...
 
@@ -26,8 +26,6 @@ This is a list of all installed packages.  The `Currently Enabled` column shows 
 The columns to the right of the package names are test results for the problem that is selected above in the `Problems` section.  The first column is an indicator for total history of that package with regard to the problem.  It shows `?` when 
 
 The columns to the right are a history of problem events.  Only events for one problem are shown at once.  Select the problem to be displayed in the `Problems` section above. Each column represents one or more reloads of Atom. Multiple columns with the same results are combined. Each colored box is a problem occurance.  
-
-**Table of packages with test results goes here.**
 
 <helpAction>
 
