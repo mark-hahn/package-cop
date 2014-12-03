@@ -9,5 +9,9 @@ module.exports =
     
   activate: -> 
     atom.workspaceView.command "package-cop:open", =>
-      atom.workspace.activePane.activateItem new PackageCopItem
+      packageCopItem = new PackageCopItem
+      atom.workspace.activePane.activateItem packageCopItem
 
+  # deactivate: ->
+  #   PackageCopItem.destroyAll()
+  #   
