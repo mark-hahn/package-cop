@@ -9,8 +9,11 @@ module.exports =
 class PackageCopItem
   Emitter.includeInto @
   
-  constructor: ->
+  constructor: (@packageCop) ->
   
-  getTitle:     -> 'Packages'
+  getTestData: -> @packageCop.getTestData()
+  putTestData: -> @packageCop.putTestData()
+  
+  getTitle:     -> 'Package Cop'
   getViewClass: -> PackageCopItemView
-  
+    

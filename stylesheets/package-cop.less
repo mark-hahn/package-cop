@@ -30,7 +30,7 @@
         margin-right: 10px;
         color: lighten(blue, 35%); 
       }
-      .th-active {
+      .th-activated {
         display:inline-block;
         margin-right: 10px;
         color: lighten(green, 10%); 
@@ -48,20 +48,22 @@
     padding: 1px 4px 1px 4px;
     border-top:    1px solid @syntax-text-color;
     border-bottom: 1px solid @syntax-text-color;
-    span:not(.name):not(.loaded):not(.active) {
+    span.dot.unloaded {
       color: @syntax-background-color;
     }
-    span:not(.name).loaded:not(.active) {
+    span.dot.loaded {
       color: lighten(blue, 35%); 
     }
-    span:not(.name).active {
+    span.dot.activated {
       color: lighten(green, 10%); 
     }
     span.name {
       margin-left: 5px;
+    }
+    span.name:not(.old) {
       cursor: pointer;
     }
-    span.name:not(.willBeDisabled) {
+    span.name.enabled {
       font-weight: bold;
     }
   } 
