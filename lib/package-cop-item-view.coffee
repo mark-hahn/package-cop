@@ -2,8 +2,8 @@
   lib/package-cop-item-view.coffee
 ###
 
-fs = require 'fs'
-{execSync} = require 'child_process'
+fs     = require 'fs'
+crypto = require 'crypto'
 
 pathUtil = require 'path'
 {$,ScrollView} = require 'atom'
@@ -16,19 +16,21 @@ class PackageCopItemView extends ScrollView
   
   @content: ->
     @div class:'package-cop-item-view', tabIndex:-1, =>
+      @div class:'package-cop-help', outlet:'helpHeader'
+      
       @div class:'package-cop-help', outlet:'helpProblems'
-
-      @table outlet:'problemsTable', =>
-        @tr =>
-          @th =>
+      @table class:'problems-table', outlet:'problemsTable', =>
+        @tr => @th 'PROBLEMS'
+        @tr => @td => @input class: 'native-key-bindings', \
+                       placeholder: 'Enter new problem here'
 
       @div class:'package-cop-help', outlet:'helpPackages'
-      @table outlet:'packagesTable', =>
+      @table class:'packages-table', outlet:'packagesTable', =>
         @tr =>
           @th =>
             @div class:'th-pkgs',       'INSTALLED PACKAGES'
             @div class:'th-loaded',     'Loaded'
-            @div class:'th-activated',     'Activated'
+            @div class:'th-activated',  'Activated'
             @div class:'th-enabled',    'Enabled'
             @div class:'th-ctrl-click', 'Ctrl-click for web page'
             
@@ -36,9 +38,9 @@ class PackageCopItemView extends ScrollView
       
       @div class:'package-cop-help', outlet:'helpMethodology'
       
-  initialize: (packageCopItem) ->
+  initialize: (@packageCopItem) ->
     @subs = []
-    @testData = packageCopItem.getTestData()
+    @testData = @packageCopItem.getTestData()
     
     if atom.config.get 'package-cop.showHelpText'
       helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
@@ -91,56 +93,8 @@ class PackageCopItemView extends ScrollView
       """
       @packagesTable.append pkgVers.$tr
       
-    packageCopItem.putTestData()
-
-    @subs.push @packagesTable.on 'click', 'tr', (e) =>
-      $tr = $ e.currentTarget
-      packageId = $tr.attr 'class'
-      if not packageId then return
-      name = PackageVersion.nameFromPackageId packageId
-      $name = $tr.find '.name'
-      if e.ctrlKey
-        if e.altKey
-          Uninstall = atom.confirm
-            message: 'Package Cop: Confirm Uninstall\n'
-            detailedMessage: 'Are you sure you want to uninstall the package ' + name +
-                            '? The package will be removed and all test results lost. ' +
-                            'Please wait a few seconds ...'
-            buttons: ['Cancel', 'Uninstall']
-          if Uninstall
-            try
-              console.log execSync 'apm uninstall ' + name, encoding: 'utf8'
-            catch e
-              atom.confirm
-                message: 'Package Cop: Error During Uninstall\n'
-                detailedMessage: e.message
-                buttons: ['OK']
-              return
-            delete @testData[packageId]
-            packageCopItem.putTestData()
-            $tr.remove()
-        else
-          url = @testData[packageId].repoURL ? 'https://atom.io/packages/' + name
-          if atom.webBrowser
-            atom.webBrowser.createPage url
-          else
-            require('shell').openExternal url
-        return
-        
-      pkgVers = @testData[packageId]
-      if pkgVers.getOldVersion() then return
-      
-      if pkgVers.getEnabled()
-        pkgVers.deactivate()
-        pkgVers.disable()
-        pkgVers.unload()
-        $name.removeClass('enabled')
-      else 
-        pkgVers.load()
-        pkgVers.enable()
-        pkgVers.activate()
-        $name.addClass('enabled')
-        
+    @packageCopItem.putTestData()
+    
     @chkActivatedInterval = setInterval =>
       for packageId, pkgVers of @testData
         if (state = pkgVers.getStateIfChanged())
@@ -155,6 +109,78 @@ class PackageCopItemView extends ScrollView
           else            $name.removeClass 'enabled'
     , 1000
     
+    @setupEvents()
+
+  selectProblem: ($tr) ->
+    @problemsTable.find('tr').removeClass 'selected'
+    $tr.addClass 'selected'
+    # id = $tr.attr 'data-id'
+    # $td  = $tr.find 'td'
+    # title = $td.text()
+    
+  setupEvents: ->
+    @subs.push @problemsTable.on 'keypress', 'input', (e) => 
+      if e.which is 13
+        $tr  = $(e.target).closest 'tr'
+        $td  = $tr.find 'td'
+        $inp = $tr.find 'input'
+        if $inp.length
+          if not (title = $inp.val()) then return
+          for packageId, pkgVers of @testData
+            if title.toLowerCase() is pkgVers.name.toLowerCase()
+              atom.confirm
+                message: 'Package-Cop: Duplicate Problem Name\n'
+                detailedMessage: 'Another problem has the same name "' + pkgVers.name + '".'
+                buttons: ['OK']
+              return
+          $newTr = $tr.clone()
+          hashStr = title + (new Date().toString()) + Math.random()
+          id = crypto.createHash("md5").update(hashStr).digest("hex")
+          $inp.remove()
+          $tr.addClass 'problem-title'
+          $tr.attr 'data-id', id
+          $td.text title
+          $newTr.removeAttr 'data-id'
+          $newTr.find('input').val ''
+          @problemsTable.append $newTr
+        @selectProblem $tr
+        false
+    
+    @subs.push @problemsTable.on 'click', 'tr', (e) =>
+      $tr = $ e.currentTarget
+      if $tr.hasClass 'problem-title'
+        @selectProblem $tr
+
+    @subs.push @packagesTable.on 'click', 'tr', (e) =>
+      $tr = $ e.currentTarget
+      packageId = $tr.attr 'class'
+      if not packageId then return
+      pkgVers = @testData[packageId]
+      
+      if e.ctrlKey
+        if e.altKey
+          if pkgVers.uninstall()
+            delete @testData[packageId]
+            @packageCopItem.putTestData()
+            $tr.remove()
+        else
+          @testData[packageId].openURL()
+        return
+        
+      if pkgVers.getOldVersion() then return
+      
+      $name = $tr.find '.name'
+      if pkgVers.getEnabled()
+        pkgVers.deactivate()
+        pkgVers.disable()
+        pkgVers.unload()
+        $name.removeClass('enabled')
+      else 
+        pkgVers.load()
+        pkgVers.enable()
+        pkgVers.activate()
+        $name.addClass('enabled')
+
   destroy: ->
     if @chkActivatedInterval 
       clearInterval @chkActivatedInterval

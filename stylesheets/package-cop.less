@@ -12,62 +12,93 @@
     font-size: 14px;
   }
   
-  table {
+  .problems-table {
+    margin-bottom: 20px;
+    width: 200px;
     font-size: 14px;
-  }
-  th {
+    th {
       padding: 0 3px 5px 5px;
-      .th-dot {
-        border-top:    1px solid @syntax-text-color;
-        border-bottom: 1px solid @syntax-text-color;
-      }
-      .th-pkgs {
-        border-top: 1px solid @syntax-text-color;
-        font-weight: bold;
-      }
-      .th-loaded {
-        display:inline-block;
-        margin-right: 10px;
-        color: lighten(blue, 35%); 
-      }
-      .th-activated {
-        display:inline-block;
-        margin-right: 10px;
-        color: lighten(green, 10%); 
-      }
-      .th-enabled {
-        display:inline-block;
-        margin-right: 10px;
-      }
-      .th-ctrl-click {
-        font-weight: normal;
-        display: block;
-      }
-  }
-  td {
-    padding: 1px 4px 1px 4px;
-    border-top:    1px solid @syntax-text-color;
-    border-bottom: 1px solid @syntax-text-color;
-    span.dot.unloaded {
-      color: @syntax-background-color;
+      border-bottom: 1px solid @syntax-text-color;
     }
-    span.dot.loaded {
-      color: lighten(blue, 35%); 
+    tr {
+      border-top:    1px solid @syntax-text-color;
     }
-    span.dot.activated {
-      color: lighten(green, 10%); 
-    }
-    span.name {
-      margin-left: 5px;
-    }
-    span.name:not(.old) {
+    tr.problem-title:not(.selected) {
       cursor: pointer;
     }
-    span.name.enabled {
+    .selected {
       font-weight: bold;
     }
-  } 
-  
+    input {
+      width:         200px;
+      margin-top:      5px;
+      height:         21px;
+      padding-left:    8px;
+      padding-right:   2px;
+      box-shadow:     none;
+      border-radius:   4px;
+      border: 1px solid @input-border-color;
+      color:            @text-color;
+      background-color: @input-background-color;
+    }
+  }
+
+  .packages-table {
+    font-size: 14px;
+    th {
+        padding: 0 3px 5px 5px;
+        .th-dot {
+          border-top:    1px solid @syntax-text-color;
+          border-bottom: 1px solid @syntax-text-color;
+        }
+        .th-pkgs {
+          border-top: 1px solid @syntax-text-color;
+          font-weight: bold;
+        }
+        .th-loaded {
+          display:inline-block;
+          margin-right: 10px;
+          color: lighten(blue, 35%); 
+        }
+        .th-activated {
+          display:inline-block;
+          margin-right: 10px;
+          color: lighten(green, 10%); 
+        }
+        .th-enabled {
+          display:inline-block;
+          margin-right: 10px;
+        }
+        .th-ctrl-click {
+          font-weight: normal;
+          display: block;
+        }
+    }
+    td {
+      padding: 1px 4px 1px 4px;
+      border-top:    1px solid @syntax-text-color;
+      border-bottom: 1px solid @syntax-text-color;
+      span.dot.unloaded {
+        color: @syntax-background-color;
+      }
+      span.dot.loaded {
+        color: lighten(blue, 35%); 
+      }
+      span.dot.activated {
+        color: lighten(green, 10%); 
+      }
+      span.name {
+        margin-left: 5px;
+      }
+      span.name:not(.old) {
+        cursor: pointer;
+      }
+      span.name.enabled {
+        font-weight: bold;
+      }
+    } 
+  }
+    
   code {
       background: rgba(128, 128, 128, 0.15) !important;
       color: @syntax-text-color  !important;
