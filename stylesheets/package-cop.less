@@ -12,93 +12,202 @@
     font-size: 14px;
   }
   
-  .problems-table {
-    margin-bottom: 20px;
-    width: 200px;
-    font-size: 14px;
-    th {
-      padding: 0 3px 5px 5px;
-      border-bottom: 1px solid @syntax-text-color;
-    }
-    tr {
-      border-top:    1px solid @syntax-text-color;
-    }
-    tr.problem-title:not(.selected) {
-      cursor: pointer;
-    }
-    .selected {
-      font-weight: bold;
-    }
-    input {
-      width:         200px;
-      margin-top:      5px;
-      height:         21px;
-      padding-left:    8px;
-      padding-right:   2px;
-      box-shadow:     none;
-      border-radius:   4px;
-      border: 1px solid @input-border-color;
-      color:            @text-color;
-      background-color: @input-background-color;
-    }
-  }
-
-  .packages-table {
-    font-size: 14px;
-    th {
-        padding: 0 3px 5px 5px;
-        .th-dot {
-          border-top:    1px solid @syntax-text-color;
+  .problem-horiz {
+    clear: both;
+    height:150px;
+    margin: 20px 0 20px 0;
+    
+    .problems-table {
+      float:left;
+      margin-bottom: 20px;
+      padding:10px; 
+      border:1px solid gray;
+      border-radius: 5px;
+      width: 240px;
+      height:142px;
+      overflow:auto;
+      
+      table {
+        width: 200px;
+        font-size: 14px;
+        th {
+          padding: 0 3px 5px 5px;
           border-bottom: 1px solid @syntax-text-color;
         }
-        .th-pkgs {
-          border-top: 1px solid @syntax-text-color;
+        tr:not(:first) {
+          border-top:    1px solid @syntax-text-color;
+        }
+        tr.problem-name:not(.selected) {
+          cursor: pointer;
+        }
+        .selected {
           font-weight: bold;
         }
-        .th-loaded {
-          display:inline-block;
-          margin-right: 10px;
-          color: lighten(blue, 35%); 
+        input {
+          width:         200px;
+          margin-top:      5px;
+          height:         21px;
+          padding-left:    8px;
+          padding-right:   2px;
+          box-shadow:     none;
+          border-radius:   4px;
+          border: 1px solid @input-border-color;
+          color:            @text-color;
+          background-color: @input-background-color;
         }
-        .th-activated {
-          display:inline-block;
-          margin-right: 10px;
-          color: lighten(green, 10%); 
-        }
-        .th-enabled {
-          display:inline-block;
-          margin-right: 10px;
-        }
-        .th-ctrl-click {
-          font-weight: normal;
-          display: block;
-        }
+      }
     }
-    td {
-      padding: 1px 4px 1px 4px;
-      border-top:    1px solid @syntax-text-color;
-      border-bottom: 1px solid @syntax-text-color;
-      span.dot.unloaded {
-        color: @syntax-background-color;
+    .problem-detail {
+      position: relative;
+      float:left;
+      font-size:14px;
+      padding:10px; 
+      height:142px;
+      margin-left:25px;
+      border:1px solid gray;
+      border-radius: 5px;
+      
+      .btn {
+        margin: 2px;
       }
-      span.dot.loaded {
-        color: lighten(blue, 35%); 
+      .problem-hdr {
+        .problem-hdr-hdr {
+          border-bottom: 1px dashed gray;
+          .problem-name {
+            position:relative;
+            top:-5px;
+            font-weight: bold;
+            font-size:16px;
+          }
+          .problem-rename {
+            position:absolute;
+            top:1px;
+            right: 60px;
+          }
+          .problem-delete {
+            position:absolute;
+            top:1px;
+            right: 2px;
+          }
+        }
+        .problem-hdr-summary {
+        }
       }
-      span.dot.activated {
-        color: lighten(green, 10%); 
+      .report-result {
+        margin-top:5px;
+        border-top: 1px solid gray;
+        display: inline-block;
+        padding-right:5px;
+        .report-result-hdr {
+          margin-top:3px;
+          font-weight: bold;
+        }
       }
-      span.name {
-        margin-left: 5px;
+      .edit-problem {
+        margin-top:5px;
+        border-top: 1px solid gray;
+        border-left: 1px solid gray;
+        padding-left:5px;
+        display: inline-block;
+        .problem-edit-hdr {
+          margin-top:3px;
+          font-weight: bold;
+        }
       }
-      span.name:not(.old) {
-        cursor: pointer;
-      }
-      span.name.enabled {
+    }
+  }
+  .enable-horiz {
+    font-size: 14px;
+    height: 50px;
+    margin-bottom: 20px;
+    
+    .enable-packages {
+      padding-left: 10px;
+      height: 60px;
+      border: 1px solid gray;
+      border-radius: 5px;
+      .enable-packages-hdr {
+        margin-top:3px;
         font-weight: bold;
       }
-    } 
+    }
+    .enable-packages.no-problem {
+      width: 170px;
+      .btn-sel-auto, .btn-sel-auto-all {
+        display:none;
+      }
+    }
+    .enable-packages:not(.no-problem) {
+      width: 445px;
+    }
+    .btn {
+      margin:2px;
+    }
   }
+  .package-horiz {
+    clear: both;
+    padding: 10px 0 10px 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
     
+    .packages-table {
+      clear:both;
+      font-size: 14px;
+      th {
+          padding: 0 3px 5px 5px;
+          
+          .th-dot {
+            border-top:    1px solid @syntax-text-color;
+            border-bottom: 1px solid @syntax-text-color;
+          }
+          .th-pkgs {
+            font-weight: bold;
+          }
+          .th-loaded {
+            display:inline-block;
+            margin-right: 10px;
+            color: lighten(blue, 35%); 
+          }
+          .th-activated {
+            display:inline-block;
+            margin-right: 10px;
+            color: lighten(green, 10%); 
+          }
+          .th-enabled {
+            display:inline-block;
+            margin-right: 10px;
+          }
+          .th-ctrl-click,.th-click {
+            font-weight: normal;
+            display: block;
+          }
+      }
+      td {
+        padding: 1px 4px 1px 4px;
+        border-top:    1px solid @syntax-text-color;
+        border-bottom: 1px solid @syntax-text-color;
+        span.dot.unloaded {
+          color: @syntax-background-color;
+        }
+        span.dot.loaded {
+          color: lighten(blue, 35%); 
+        }
+        span.dot.activated {
+          color: lighten(green, 10%); 
+        }
+        span.name {
+          margin-left: 5px;
+        }
+        span.name:not(.old) {
+          cursor: pointer;
+        }
+        span.name.enabled {
+          font-weight: bold;
+        }
+      } 
+    }
+  }
+  
   code {
       background: rgba(128, 128, 128, 0.15) !important;
       color: @syntax-text-color  !important;

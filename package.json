@@ -2,7 +2,7 @@
   "name": "package-cop",
   "main": "./lib/package-cop",
   "version": "0.1.0",
-  "description": "Find package causing an error by logging errors",
+  "description": "Find pkg causing an error by logging errors",
   "activationCommands": {
     "atom-workspace": "package-cop:open"
   },
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "emissary": "*",
-    "marked": "0.3.1"
+    "marked":   "0.3.1",
+    "moment":   ">=2.7.0"
   }
 }

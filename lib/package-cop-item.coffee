@@ -2,7 +2,7 @@
   lib/package-cop-item.coffee
 ###
 
-{Emitter}   = require 'emissary'
+{Emitter} = require 'emissary'
 PackageCopItemView = require './package-cop-item-view'
 
 module.exports =
@@ -11,8 +11,9 @@ class PackageCopItem
   
   constructor: (@packageCop) ->
   
-  getTestData: -> @packageCop.getTestData()
-  putTestData: -> @packageCop.putTestData()
+  getProblems:   -> @packageCop.getProblems()
+  getPackages:   -> @packageCop.getPackages()
+  saveDataStore: -> @packageCop.saveDataStore()
   
   getTitle:     -> 'Package Cop'
   getViewClass: -> PackageCopItemView

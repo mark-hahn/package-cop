@@ -1,7 +1,7 @@
 {WorkspaceView} = require 'atom'
 PackageCop = require '../lib/package-cop'
 
-# Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
+# Use the command `window:run-pkg-specs` (cmd-alt-ctrl-p) to run specs.
 #
 # To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
 # or `fdescribe`). Remove the `f` to unfocus the block.
@@ -17,7 +17,7 @@ describe "PackageCop", ->
     it "attaches and then detaches the view", ->
       expect(atom.workspaceView.find('.package-cop')).not.toExist()
 
-      # This is an activation event, triggering it will cause the package to be
+      # This is an activation event, triggering it will cause the pkg to be
       # activated.
       atom.commands.dispatch atom.workspaceView.element, 'package-cop:toggle'
 
