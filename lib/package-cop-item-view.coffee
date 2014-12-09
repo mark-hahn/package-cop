@@ -27,7 +27,7 @@ class PackageCopItemView extends ScrollView
         @div class:'problems-table', =>
           @table outlet:'problemsTable', =>
             @tr => @th 'SELECT PROBLEM'
-            @tr => @td => @input class: 'native-key-bindings', \
+            @tr => @td => @input class: 'native-key-bindings new-problem-input', \
                            placeholder: 'Enter new problem'
                  
         @div class: 'problem-detail', outlet: 'problemDetail', =>
@@ -47,6 +47,7 @@ class PackageCopItemView extends ScrollView
             @div class: 'problem-edit-hdr', 'Edit Problem:'
             @div class: 'btn native-key-bindings problem-rename', 'Rename'
             @div class: 'btn native-key-bindings problem-delete', 'Delete'
+            @input class: 'native-key-bindings rename-input'
           
       @div class:'package-horiz', =>
         @div class:'package-cop-help', outlet:'helpPackages'
@@ -179,6 +180,16 @@ class PackageCopItemView extends ScrollView
     @problemsTable.append $newTr
     if reverse then @problemsTable.find('tr:first').after $tr
 
+  renameSelectedProblem: ->
+    if @currentProblem and
+        not ($inp = @problemDetail.find '.rename-input').hasClass 'active'
+      $inp.val @currentProblem.name
+         .addClass 'active'
+         .focus()
+    
+  cancelProblemRename: ->
+    @problemDetail.find('.rename-input').removeClass 'active'
+
   deleteSelectedProblem: ->
     if ($tr = @problemsTable.find 'tr.selected').length is 0 then return
     problemId = $tr.attr 'data-problemid'
@@ -203,6 +214,7 @@ class PackageCopItemView extends ScrollView
     if $trs.length < 3 
       @find('.problem-detail').hide()
       $enablePackagesDiv.addClass 'no-problem'
+      @currentProblem = null
       return
     else if $trs.length is 3 
       $enablePackagesDiv.addClass 'one-problem'
@@ -242,27 +254,33 @@ class PackageCopItemView extends ScrollView
       $td.append '<span data-reportId="' + reportId + '" ' +
         'class="octicon octicon-dot ' + tdClass + '-dot ' + state + '"></span>'
     
+  getProblemName: ($inp, sameAsSelOK) ->
+    if not /\w/.test (name = $inp.val()) then return
+    name = name.replace /^\s+|\s+$/g, ''
+    lcName = name.toLowerCase()
+    for problemId, problem of @problems
+      if lcName is problem.name.toLowerCase() and
+          not (sameAsSelOK and lcName is @currentProblem.name.toLowerCase())
+        atom.confirm
+          message: 'Package-Cop: Duplicate Problem Name\n'
+          detailedMessage: 'Another problem has the same name "' + problem.name + '".'
+          buttons: ['OK']
+        return 
+    return name
+    
   setupEvents: ->
-    @subs.push @problemsTable.on 'keypress', 'input', (e) => 
+    @subs.push @problemsTable.on 'keypress', 'input.new-problem-input', (e) => 
       if e.which is 13
         $tr = $(e.target).closest 'tr'
         if ($inp = $tr.find 'input').length
-          if not /\w/.test (name = $inp.val()) then return
-          name = name.replace /^\s+|\s+$/g, ''
-          for problemId, prb of @problems
-            if name.toLowerCase() is prb.name.toLowerCase()
-              atom.confirm
-                message: 'Package-Cop: Duplicate Problem Name\n'
-                detailedMessage: 'Another problem has the same name "' + prb.name + '".'
-                buttons: ['OK']
-              return
-          prb = new Problem name
-          @problems[prb.problemId] = prb
-          @packageCopItem.saveDataStore()
-          @addProblemToTable prb
-          @selectProblem $tr
+          if (name = @getProblemName $inp)
+            problem = new Problem name
+            @problems[problem.problemId] = problem
+            @packageCopItem.saveDataStore()
+            @addProblemToTable problem
+            @selectProblem $tr
         false
-    
+
     @subs.push @problemsTable.on 'click', 'tr', (e) =>
       $tr = $(e.target).closest 'tr'
       if $tr.hasClass 'problem-name'
@@ -284,6 +302,21 @@ class PackageCopItemView extends ScrollView
         @packages[packageId].getStates()[reportId] = state
       @packageCopItem.saveDataStore()
 
+    @subs.push @problemDetail.on 'click', '.problem-rename', =>
+      @renameSelectedProblem()
+
+    @subs.push @problemDetail.on 'keypress', '.rename-input', (e) => 
+      if e.which is 13
+        if (name = @getProblemName $(e.target), yes)
+          @problemsTable.find('tr.selected td').text name
+          @problemName.text name
+          @currentProblem.name = name
+          @packageCopItem.saveDataStore()
+        @cancelProblemRename()
+        false
+
+    @subs.push @problemDetail.on 'blur', '.rename-input', => @cancelProblemRename()
+    
     @subs.push @problemDetail.on 'click', '.problem-delete', =>
       @deleteSelectedProblem()
 
