@@ -43,11 +43,11 @@ class PackageCopItemView extends ScrollView
             @div class: 'btn native-key-bindings problem-report fail', 'Problem Occurred'
             @div class: 'btn native-key-bindings problem-report pass', 'Passed Test'
             
-          @div class:'edit-problem', =>
+          @div class:'edit-problem', outlet:'editProblem', =>
             @div class: 'problem-edit-hdr', 'Edit Problem:'
             @div class: 'btn native-key-bindings problem-rename', 'Rename'
             @div class: 'btn native-key-bindings problem-delete', 'Delete'
-            @input class: 'native-key-bindings rename-input'
+            @input class: 'native-key-bindings rename-input', outlet: 'renameInput'
           
       @div class:'package-horiz', =>
         @div class:'package-cop-help', outlet:'helpPackages'
@@ -181,14 +181,15 @@ class PackageCopItemView extends ScrollView
     if reverse then @problemsTable.find('tr:first').after $tr
 
   renameSelectedProblem: ->
-    if @currentProblem and
-        not ($inp = @problemDetail.find '.rename-input').hasClass 'active'
-      $inp.val @currentProblem.name
-         .addClass 'active'
-         .focus()
+    if @currentProblem and not @renameInput.hasClass 'active'
+      @editProblem.addClass 'rename'
+      @renameInput.addClass 'active'
+                  .val @currentProblem.name
+                  .focus()
     
   cancelProblemRename: ->
-    @problemDetail.find('.rename-input').removeClass 'active'
+    @editProblem.removeClass 'rename'
+    @renameInput.removeClass 'active'
 
   deleteSelectedProblem: ->
     if ($tr = @problemsTable.find 'tr.selected').length is 0 then return
@@ -204,6 +205,17 @@ class PackageCopItemView extends ScrollView
       @packageCopItem.saveDataStore()
       $tr.remove()
       @selectProblem()
+      
+  setLastReport: -> 
+    if (time = @currentProblem.getLatestReportTime())
+      timeMoment = moment time
+      @lastReport.html 'Last Report: ' +
+        timeMoment.format('ddd') + '&nbsp;&nbsp;' +
+        timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
+        timeMoment.fromNow()
+      @lastReport.show()
+    else 
+      @lastReport.hide()
   
   selectProblem: ($tr) ->
     $trs = @problemsTable.find('tr')
@@ -224,15 +236,7 @@ class PackageCopItemView extends ScrollView
     problemid = $tr.attr 'data-problemid'
     @currentProblem =  @problems[problemid]
     @problemName.text @currentProblem.name
-    if (time = @currentProblem.getLatestReportTime())
-      timeMoment = moment time
-      @lastReport.html 'Last Report: ' +
-        timeMoment.format('ddd') + '&nbsp;&nbsp;' +
-        timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
-        timeMoment.fromNow()
-      @lastReport.show()
-    else 
-      @lastReport.hide()
+    @setLastReport()
     @resolution.text 'Packages Cleared: 0/0, 0%'
     
     states = []
@@ -274,10 +278,10 @@ class PackageCopItemView extends ScrollView
         $tr = $(e.target).closest 'tr'
         if ($inp = $tr.find 'input').length
           if (name = @getProblemName $inp)
-            problem = new Problem name
-            @problems[problem.problemId] = problem
+            @currentProblem = new Problem name
+            @problems[@currentProblem.problemId] = @currentProblem
             @packageCopItem.saveDataStore()
-            @addProblemToTable problem
+            @addProblemToTable @currentProblem
             @selectProblem $tr
         false
 
@@ -290,6 +294,7 @@ class PackageCopItemView extends ScrollView
       failed = $(e.target).hasClass 'fail'
       reportId = Date.now()
       @currentProblem.addReport reportId, failed
+      @setLastReport()
       @packagesTable.find('tr:not(.pkg-hdr-tr)').each (idx, tr) =>
         $tr = $ tr
         $dot = $tr.find '.dot.current'
@@ -305,7 +310,7 @@ class PackageCopItemView extends ScrollView
     @subs.push @problemDetail.on 'click', '.problem-rename', =>
       @renameSelectedProblem()
 
-    @subs.push @problemDetail.on 'keypress', '.rename-input', (e) => 
+    @subs.push @renameInput.on 'keypress', (e) => 
       if e.which is 13
         if (name = @getProblemName $(e.target), yes)
           @problemsTable.find('tr.selected td').text name
@@ -315,7 +320,7 @@ class PackageCopItemView extends ScrollView
         @cancelProblemRename()
         false
 
-    @subs.push @problemDetail.on 'blur', '.rename-input', => @cancelProblemRename()
+    @subs.push @renameInput.on 'blur', => @cancelProblemRename()
     
     @subs.push @problemDetail.on 'click', '.problem-delete', =>
       @deleteSelectedProblem()
