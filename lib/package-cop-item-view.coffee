@@ -17,6 +17,8 @@ class PackageCopItemView extends ScrollView
   
   @content: ->
     @div class:'package-cop-item-view', tabIndex:-1, =>
+      @div class:'package-cop-title', 
+                 '__________ Package Cop __________'
       @div class:'package-cop-help', outlet:'helpHeader'
       
       @div class:'problem-horiz', =>
@@ -38,38 +40,40 @@ class PackageCopItemView extends ScrollView
               
           @div class: 'report-result', =>
             @div class: 'report-result-hdr', 'Report Result:'
-            @div class: 'btn native-key-bindings problem-fail', 'Problem Occured'
-            @div class: 'btn native-key-bindings problem-pass', 'Passed Test'
+            @div class: 'btn native-key-bindings problem-report fail', 'Problem Occurred'
+            @div class: 'btn native-key-bindings problem-report pass', 'Passed Test'
             
           @div class:'edit-problem', =>
             @div class: 'problem-edit-hdr', 'Edit Problem:'
             @div class: 'btn native-key-bindings problem-rename', 'Rename'
             @div class: 'btn native-key-bindings problem-delete', 'Delete'
           
-      @div class:'enable-horiz', =>
-        @div class:'package-cop-help', outlet:'helpEnableBtns'
+      @div class:'package-horiz', =>
+        @div class:'package-cop-help', outlet:'helpPackages'
         
         @div class: 'enable-packages', =>
-          @div class: 'enable-packages-hdr', 'Enable Packages:'
-          @div class: 'btn native-key-bindings btn-sel-auto',     'Test This Problem (Bisect)'
+          @div class: 'enable-packages-hdr', 'Enable:'
+          @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
           @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
           @div class: 'btn native-key-bindings btn-sel-all',      'All'
           @div class: 'btn native-key-bindings btn-sel-none',     'None'
           @div class: 'btn native-key-bindings btn-sel-starred',  'Starred'
         
-      @div class:'package-horiz', =>
-        @div class:'package-cop-help', outlet:'helpPackages'
-        
         @table class:'packages-table', outlet:'packagesTable', =>
-          @tr =>
-            @th =>
+          @tr class:'pkg-hdr-tr', =>
+            @th  class:'th-installed', =>
               @div class:'th-pkgs',       'INSTALLED PACKAGES'
-              @div class:'th-click',      'Click to enable/disable'
+              # @div class:'th-click',      'Click to enable/disable'
               @div class:'th-ctrl-click', 'Ctrl-click for web page'
-              @div class:'th-loaded',     'Loaded'
-              @div class:'th-activated',  'Activated'
-              @div class:'th-enabled',    'Enabled'
-            
+              @div class:'th-legend loaded',    'Loaded'
+              @div class:'th-legend activated', 'Activated'
+              @div class:'th-enabled',          'Enabled'
+              @div class:'th-cleared',          'Cleared'
+        
+            @th class:'th-chkmrk'
+            @th class:'th-Fails',  'Failed Setups'
+            @th class:'th-Passes', 'Passed Setups'
+              
       @div class:'package-cop-help', outlet:'helpAction'
       @div class:'package-cop-help', outlet:'helpMethodology'
   
@@ -77,12 +81,12 @@ class PackageCopItemView extends ScrollView
     @subs = []
     @problems = @packageCopItem.getProblems()
     @packages = @packageCopItem.getPackages()
+    @reports  = null
     
     problemList = []
     for problemId, prb of @problems then problemList.push prb
     problemList.sort (prba, prbb) -> prba.getLatestReportTime() - prbb.getLatestReportTime()
     for problem in problemList then @addProblemToTable problem, true
-    @selectProblem()
     
     if atom.config.get 'package-cop.showHelpText'
       helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
@@ -101,8 +105,7 @@ class PackageCopItemView extends ScrollView
       @packages[packageId].repoURL = homepage ? repository?.url ? repository
       @packages[packageId].inPackageMgrList = yes
       for packageId, pkg of @packages
-        if pkg.name is name and pkg.version isnt version or
-           pkg.name is 'Atom'
+        if pkg.name is name and pkg.version isnt version
           pkg.setOldVersion()
 
     for packageId, pkg of @packages
@@ -118,7 +121,7 @@ class PackageCopItemView extends ScrollView
     for packageId, pkg of @packages when pkg
       nameCounts[pkg.name] ?= 0
       nameCounts[pkg.name]++
-      
+    
     packageArray = []
     for packageId, pkg of @packages
       if pkg and nameCounts[pkg.name] > 1
@@ -131,21 +134,27 @@ class PackageCopItemView extends ScrollView
       if not pkg then delete @packages[packageId]; continue
       oldClass = (if pkg.getOldVersion() then ' old' else '')
       pkg.$tr = $ """
-        <tr class="#{packageId}"> 
-          <td>
-            <span class="octicon octicon-dot dot"></span>
+        <tr class="" data-packageId="#{packageId}"> 
+          <td class="dotname">
+            <span class="octicon octicon-dot dot current"></span>
             <span class="name#{oldClass}">#{pkg.getTitle()}</span>
           </td> 
+          <td>
+            <span class="octicon octicon-check check"></span>
+          </td> 
+          <td class="fails"></td> 
+          <td class="passes"></td> 
         </tr>
       """
       @packagesTable.append pkg.$tr
       
     @packageCopItem.saveDataStore()
+    @selectProblem()
     
     @chkActivatedInterval = setInterval =>
       for packageId, pkg of @packages
         if (state = pkg.getStateIfChanged())
-          $dot = pkg.$tr.find '.dot'
+          $dot = pkg.$tr.find '.dot.current'
           $dot.removeClass 'unloaded'
           $dot.removeClass 'loaded'
           $dot.removeClass 'activated'
@@ -189,23 +198,49 @@ class PackageCopItemView extends ScrollView
     $trs = @problemsTable.find('tr')
     $trs.removeClass 'selected'
     $enablePackagesDiv = @find '.enable-packages'
+    $enablePackagesDiv.removeClass 'no-problem'
+    $enablePackagesDiv.removeClass 'one-problem'
     if $trs.length < 3 
       @find('.problem-detail').hide()
       $enablePackagesDiv.addClass 'no-problem'
       return
-    @find('.problem-detail').show()
-    $enablePackagesDiv.removeClass 'no-problem'
+    else if $trs.length is 3 
+      $enablePackagesDiv.addClass 'one-problem'
+    @find('.problem-detail').css display: 'inline-block'
     $tr ?= $trs.eq(1)
     $tr.addClass 'selected'
     problemid = $tr.attr 'data-problemid'
-    prb =  @problems[problemid]
-    @problemName.text prb.name
-    console.log prb.getLatestReportTime()
-    time = moment prb.getLatestReportTime()
-    @lastReport.html 'Last Report: ' +
-      time.format('ddd') + '&nbsp;&nbsp;' +
-      time.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + time.fromNow()
+    @currentProblem =  @problems[problemid]
+    @problemName.text @currentProblem.name
+    if (time = @currentProblem.getLatestReportTime())
+      timeMoment = moment time
+      @lastReport.html 'Last Report: ' +
+        timeMoment.format('ddd') + '&nbsp;&nbsp;' +
+        timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
+        timeMoment.fromNow()
+      @lastReport.show()
+    else 
+      @lastReport.hide()
     @resolution.text 'Packages Cleared: 0/0, 0%'
+    
+    states = []
+    reports = @currentProblem.getReports()
+    for reportId, failed of reports
+      states.push [reportId, failed]
+    states.sort()
+    for packageId, pkg of @packages
+      $tr = pkg.$tr
+      $tr.find('.fails-dot,.passes-dot').remove()
+      for state in states
+        [reportId, failed] = state
+        state = pkg.getStates()[reportId]
+        @addReportDot $tr, failed, state, reportId
+    
+  addReportDot: ($tr, failed, state, reportId) ->
+      tdClass = (if failed then 'fails' else 'passes')
+      $td = $tr.find 'td.' + tdClass
+      $td.append '<span data-reportId="' + reportId + '" ' +
+        'class="octicon octicon-dot ' + tdClass + '-dot ' + state + '"></span>'
     
   setupEvents: ->
     @subs.push @problemsTable.on 'keypress', 'input', (e) => 
@@ -233,12 +268,28 @@ class PackageCopItemView extends ScrollView
       if $tr.hasClass 'problem-name'
         @selectProblem $tr
         
+    @subs.push @problemDetail.on 'click', '.problem-report', (e) =>
+      failed = $(e.target).hasClass 'fail'
+      reportId = Date.now()
+      @currentProblem.addReport reportId, failed
+      @packagesTable.find('tr:not(.pkg-hdr-tr)').each (idx, tr) =>
+        $tr = $ tr
+        $dot = $tr.find '.dot.current'
+        state = switch
+          when $dot.hasClass 'unloaded'  then 'unloaded'
+          when $dot.hasClass 'loaded'    then 'loaded'
+          when $dot.hasClass 'activated' then 'activated'
+        @addReportDot $tr, failed, state, reportId
+        packageId = $tr.attr 'data-packageId'
+        @packages[packageId].getStates()[reportId] = state
+      @packageCopItem.saveDataStore()
+
     @subs.push @problemDetail.on 'click', '.problem-delete', =>
       @deleteSelectedProblem()
 
-    @subs.push @packagesTable.on 'click', 'tr', (e) =>
-      $tr = $ e.currentTarget
-      packageId = $tr.attr 'class'
+    @subs.push @packagesTable.on 'click', 'td.dotname', (e) =>
+      $tr = $(e.target).closest('tr')
+      packageId = $tr.attr 'data-packageId'
       if not packageId then return
       pkg = @packages[packageId]
       

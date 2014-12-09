@@ -9,11 +9,18 @@ class Problem
   
   constructor: (@name) ->
     if typeof @name is 'object'
-      {@problemId, @name, @latestReportTime} = @name
+      {@problemId, @name, @reports} = @name
     else
       hashStr = @name + (new Date().toString()) + Math.random()
       @problemId = 'prb-' + crypto.createHash('md5').update(hashStr).digest('hex')
-      @setLatestReportTime()
+      @reports = {}
 
-  getLatestReportTime: -> @latestReportTime
-  setLatestReportTime: -> @latestReportTime = Date.now()
+  addReport: (reportId, failed) -> @reports[reportId] = failed
+  
+  getReports: -> @reports
+  
+  getLatestReportTime: -> 
+    maxTime = 0
+    for reportId of @reports
+      maxTime = Math.max maxTime, reportId
+    maxTime
