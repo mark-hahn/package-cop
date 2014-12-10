@@ -16,6 +16,8 @@ class DataStore
       if process.platform is 'win32' then process.env.USERPROFILE
       else process.env.HOME
     @dataPath = pathUtil.join(home, '.atom', '.package-cop.json')
+    
+  reload: ->
     data = try
       JSON.parse fs.readFileSync @dataPath, 'utf8'
     catch e
@@ -30,7 +32,7 @@ class DataStore
     for packageId, packageData of @packages
       @packages[packageId] = new Package packageData
     @packages = Package.removeUninstalled @packages
-  
+    
   getProblems: -> @problems
   getPackages: -> @packages
     

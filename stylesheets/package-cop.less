@@ -21,7 +21,6 @@
   }
 
   .problem-horiz {
-    // clear: both;
     position:relative;
     height:143px;
     min-width: 650px;
@@ -47,6 +46,7 @@
           padding: 0 0 5px 3px;
         }
         tr.problem-name td {
+          color: @syntax-text-color;
           padding-left: 3px;
           border-top:    1px solid @syntax-text-color;
           border-bottom: 1px solid @syntax-text-color;
@@ -123,7 +123,6 @@
       .edit-problem.rename  {
         top: 54px;
       }
-      
       .edit-problem {
         position: absolute;
         left:235px;
@@ -192,14 +191,23 @@
     .packages-table {
       clear:both;
       width: 99%;
-      .unloaded {
+      position:relative;
+      
+      .unloaded.current {
+        position:relative;
+        left:1px;
         color: @syntax-background-color;
       }
+      .unloaded:not(.current) {
+        position:relative;
+        left:1px;
+        color: @syntax-text-color;
+      }
       .loaded {
-        color: rgba(128,128,128,10);
+        color: rgba(128,128,128,0.5);
       }
       .activated {
-        color: blue;
+        color: rgba(128,0,0,0.8);
       }
       .th-installed {
           padding: 0 3px 5px 5px;
@@ -231,19 +239,15 @@
       .th-chkmrk {
         width: 15px;
       }
-      .th-Fails{
-        vertical-align: bottom;
-        padding-left: 4px;
-        border-bottom: 1px solid @syntax-text-color;
+      .th-fails,.th-passes {
+        position: relative;
       }
-      .th-Passes {
-        vertical-align: bottom;
-        padding-left: 4px;
-        border-bottom: 1px solid @syntax-text-color;
+      .th-fails-label,.th-passes-label {
+        position:absolute;
+        left: 6px;
+        bottom: 0;
       }
-      .fails-dot,.passes-dot {
-        padding-left:5px;
-      }
+      
       td {
         padding: 1px 4px 1px 4px;
         border-top:    1px solid @syntax-text-color;
@@ -262,7 +266,19 @@
         span.check {
           color: lighten(green, 10%); 
         }
+        .fails-dot,.passes-dot {
+          cursor: pointer;
+          padding-left:5px;
+        }
       } 
+    }
+    .time-popup {
+      position: absolute;
+      padding:0 3px 0 3px;
+      border: 1px solid gray;
+      font-size:12px;
+      background-color: @syntax-background-color;
+      box-shadow: 2px 2px ;
     }
   }
   

@@ -15,6 +15,7 @@ module.exports =
     @dataStore = new DataStore
     
     atom.workspaceView.command "package-cop:open", =>
+      @dataStore.reload()
       workspace  = atom.workspace
       for pane in workspace.getPanes()
         for item in pane.getItems()

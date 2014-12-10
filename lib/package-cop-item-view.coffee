@@ -72,8 +72,12 @@ class PackageCopItemView extends ScrollView
               @div class:'th-cleared',          'Cleared'
         
             @th class:'th-chkmrk'
-            @th class:'th-Fails',  'Failed Setups'
-            @th class:'th-Passes', 'Passed Setups'
+            @th class:'th-fails', =>
+              @span class:'th-fails-label', 'Failed Reports'
+            @th class:'th-passes', =>
+              @span class:'th-passes-label', 'Passed Reports'
+              
+        @div class:'time-popup', outlet:'timePopup'
               
       @div class:'package-cop-help', outlet:'helpAction'
       @div class:'package-cop-help', outlet:'helpMethodology'
@@ -113,10 +117,9 @@ class PackageCopItemView extends ScrollView
       if not pkg.inPackageMgrList
         hasState = no
         for hasState of pkg.getStates() then break
-        if hasState
+        if not hasState
           @packages[packageId] = null
           continue
-      delete pkg.inPackageMgrList
       
     nameCounts = {Atom: 1}
     for packageId, pkg of @packages when pkg
@@ -194,13 +197,19 @@ class PackageCopItemView extends ScrollView
   deleteSelectedProblem: ->
     if ($tr = @problemsTable.find 'tr.selected').length is 0 then return
     problemId = $tr.attr 'data-problemid'
-    name = @problems[problemId].name
+    problem = @problems[problemId]
+    name = problem.name
     btn = atom.confirm
       message: 'Package-Cop: Confirm Problem Deletion\n'
       detailedMessage: 'Are you sure you want to delete the problem "' + name +
                         '" and all its test report data?'
       buttons: ['Cancel', 'Delete']
     if btn is 1
+      reportIds = []
+      reports = problem.getReports()
+      for reportId of reports then reportIds.push reportId
+      for reportId in reportIds
+        @deleteReport reportId, yes
       delete @problems[problemId]
       @packageCopItem.saveDataStore()
       $tr.remove()
@@ -240,8 +249,8 @@ class PackageCopItemView extends ScrollView
     @resolution.text 'Packages Cleared: 0/0, 0%'
     
     states = []
-    reports = @currentProblem.getReports()
-    for reportId, failed of reports
+    @reports = @currentProblem.getReports()
+    for reportId, failed of @reports
       states.push [reportId, failed]
     states.sort()
     for packageId, pkg of @packages
@@ -249,14 +258,26 @@ class PackageCopItemView extends ScrollView
       $tr.find('.fails-dot,.passes-dot').remove()
       for state in states
         [reportId, failed] = state
-        state = pkg.getStates()[reportId]
+        state = pkg.getStates()[reportId] ? 'no-state'
         @addReportDot $tr, failed, state, reportId
     
   addReportDot: ($tr, failed, state, reportId) ->
       tdClass = (if failed then 'fails' else 'passes')
       $td = $tr.find 'td.' + tdClass
-      $td.append '<span data-reportId="' + reportId + '" ' +
-        'class="octicon octicon-dot ' + tdClass + '-dot ' + state + '"></span>'
+      $td.append '<span data-reportid="' + reportId + '" ' +
+        'class="' + tdClass + '-dot ' + state + ' report' +
+        (switch state
+           when 'no-state' then '">&nbsp;</span>'
+           when 'unloaded' then '">-</span>'
+           else ' octicon octicon-dot"></span>')
+
+  deleteReport: (reportId, dontSave) ->
+    @packagesTable.find('span.report[data-reportid="' + reportId + '"]').remove()
+    delete @reports[reportId]
+    for packageId, pkg of @packages
+      delete pkg.getStates()[reportId]
+    if not dontSave
+      @packageCopItem.saveDataStore()
     
   getProblemName: ($inp, sameAsSelOK) ->
     if not /\w/.test (name = $inp.val()) then return
@@ -341,7 +362,7 @@ class PackageCopItemView extends ScrollView
           @packages[packageId].openURL()
         return
         
-      if pkg.getOldVersion() then return
+      if pkg.getOldVersion() or pkg.name is 'Atom' then return
       
       $name = $tr.find '.name'
       if pkg.getEnabled()
@@ -354,6 +375,35 @@ class PackageCopItemView extends ScrollView
         pkg.enable()
         pkg.activate()
         $name.addClass('enabled')
+        
+    @subs.push @packagesTable.on 'mouseover', 'span.report', (e) =>
+      $tgt = $ e.target
+      timeMoment = moment +$tgt.attr 'data-reportid'
+      pos = $tgt.position()
+      @timePopup.show().css left: pos.left-100, top: pos.top-15
+                .html \
+                  timeMoment.format('ddd')                 + '&nbsp; &nbsp;' +
+                  timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
+                  timeMoment.fromNow()
+             
+    @subs.push @packagesTable.on 'mouseout', 'span.report', =>
+      @timePopup.hide()
+      
+    @subs.push @packagesTable.on 'click', 'span.report', (e) =>
+      $tgt = $ e.target
+      reportId = $tgt.attr 'data-reportid'
+      timeMoment = moment +reportId
+      button = atom.confirm
+        message: 'Packe-Cop: conform report deletion\n'
+        detailedMessage: 'Are you sure you want to delete the ' +
+          (if $tgt.hasClass('fails-dot') then 'failure' else 'success') +
+          ' report from ' + 
+           timeMoment.format('ddd') + '  ' +
+           timeMoment.format('YYYY-MM-DD HH:mm:ss') + '  ' + 
+           timeMoment.fromNow() + '?'
+        buttons: ['Cancel', 'Delete']
+      if button is 1
+        @deleteReport reportId
 
   destroy: ->
     if @chkActivatedInterval 

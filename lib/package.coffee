@@ -42,7 +42,7 @@ class Package
     
   @removeUninstalled = (packages) ->
     packagesOut = {}
-    allNames = atom.packages.getAvailablePackageNames()
+    allNames = atom.packages.getAvailablePackageNames().concat 'Atom'
     for id, pkg of packages when pkg.name in allNames
       packagesOut[id] = pkg
     packagesOut
@@ -63,6 +63,7 @@ class Package
   trimPropertiesForSave: -> {@name, @version, @repoURL, @states}
       
   uninstall: ->
+    if @name is 'Atom' then return
     uninstall = atom.confirm
       message: 'Package Cop: Confirm Uninstall\n'
       detailedMessage: 'Are you sure you want to uninstall the pkg ' + @name +
@@ -93,8 +94,10 @@ class Package
   getTitle:     -> @title
   getStates:    -> @states
   
-  loaded:     -> (not @oldVersion and atom.packages.isPackageLoaded @name)
-  activated:  -> (not @oldVersion and atom.packages.isPackageActive @name)
+  loaded:    -> (not @oldVersion and 
+                (@name is 'Atom' or atom.packages.isPackageLoaded @name))
+  activated: -> (not @oldVersion and 
+                (@name is 'Atom' or atom.packages.isPackageActive @name))
   getState: -> @state = 
     if   @activated() then 'activated'
     else if @loaded() then 'loaded'
