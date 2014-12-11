@@ -19,18 +19,14 @@
   .package-cop-help {
     font-size: 14px;
   }
-
   .problem-horiz {
     position:relative;
     height:143px;
-    min-width: 650px;
+    width: 720px;
     margin: 20px 0 20px 0;
-    // overflow:auto;
-    // white-space: nowrap;
     
     .problems-table {
       position:absolute;
-      // margin-bottom: 20px;
       padding:10px; 
       border:1px solid gray;
       border-radius: 3px;
@@ -162,47 +158,86 @@
       }
     }
   }
+  .action-horiz {
+    position:relative;
+    height:60px;
+    width:715px;
+    margin: 20px 0 20px 0;
+    
+    .btn {
+      margin:2px;
+    }
+    .enable-packages {
+      clear:both;
+      float:left;
+      left: 0;
+      padding-left: 10px;
+      padding-right:4px;
+      height: 62px;
+      border: 1px solid gray;
+      border-radius: 3px;
+      
+      .enable-packages-hdr {
+        position: relative;
+        top:2px;
+        font-weight: bold;
+      }
+      .enable-packages-btns {
+        position: relative;
+        top:2px;
+      }
+      .enable-packages-btns.no-problem {
+        .btn-sel-auto, .btn-sel-auto-all {
+          display:none;
+        }
+      }
+      .enable-packages-btns.one-problem {
+        .btn-sel-auto-all {
+          display:none;
+        }
+      }
+    }
+    .reload-atom {
+      position:relative;
+      float:right;
+      width:210px;
+      height:62px;
+      margin: 0 0 10px 10px;
+      border: 1px solid gray;
+      border-radius: 3px;
+      
+      .reload-atom-hdr {
+        position:absolute;
+        top:2px;
+        left:4px;
+        font-weight: bold;
+      }
+      .btn {
+        position:absolute;
+        left:115px;
+        top:2px;
+      }
+      .reload-activate {
+        position:absolute;
+        top:34px;
+        left:8px;
+        .reload-activate-chkbox {
+          position:relative;
+          top:2px;
+          margin-right:2px;
+        }
+      }
+    }
+  }
   .package-horiz {
     clear: both;
     position: relative;
-    min-width: 700px;
+    min-width:715px;
     padding: 10px 0 10px 10px;
     border: 1px solid gray;
     border-radius: 3px;
     font-size: 14px;
     
-    .enable-packages {
-      position: absolute;
-      top:2px;
-      right: 0;
-      padding-left: 10px;
-      // height: 60px;
-      .enable-packages-hdr {
-        position: relative;
-        top: -3px;
-        display: inline-block;
-        font-weight: bold;
-        margin-right: 8px;
-      }
-    }
-    .enable-packages.no-problem:not(.one-problem) {
-      width: 270px;
-      .btn-sel-auto, .btn-sel-auto-all {
-        display:none;
-      }
-    }
-    .enable-packages.one-problem:not(.no-problem) {
-      width: 397px;
-      .btn-sel-auto-all {
-        display:none;
-      }
-    }
-    .enable-packages:not(.no-problem):not(.one-problem) {
-      width: 507px;
-    }
-    .btn {
-      margin:2px;
-    }
     .packages-table {
       clear:both;
       width: 99%;
@@ -225,31 +260,50 @@
         color: rgba(128,0,0,0.8);
       }
       .th-installed {
-          padding: 0 3px 5px 5px;
-          width: 270px;
-          .th-dot {
-            border-top:    1px solid @syntax-text-color;
-            border-bottom: 1px solid @syntax-text-color;
-          }
-          .th-pkgs {
-            font-weight: bold;
-          }
-          .th-legend {
+        padding: 0 3px 0 5px;
+        width: 320px;
+        height:35px;
+        .th-dot {
+          border-top:    1px solid @syntax-text-color;
+          border-bottom: 1px solid @syntax-text-color;
+        }
+        .th-pkgs {
+          position: absolute;
+          top:-6px;
+          font-weight: bold;
+        }
+        .th-ctrl-click {
+          position: absolute;
+          top:-6px;
+          left:150px;
+          font-weight: normal;
+          display: block;
+        }
+        .th-report-click {
+          position: absolute;
+          top:-6px;
+          right:4px;
+          font-weight: normal;
+          display: block;
+        }
+        .th-legend {
+          display:inline-block;
+          margin: 5px 0 0 0;
+          .legend {
             display:inline-block;
-            margin-right: 10px;
+            margin: 12px 8px 0 0;
           }
-          .th-enabled {
-            display:inline-block;
-            margin-right: 10px;
-          }
-          .th-cleared {
-            display:inline-block;
-            color:green;
-          }
-          .th-ctrl-click,.th-click {
-            font-weight: normal;
-            display: block;
-          }
+        }
+        .th-enabled {
+          display:inline-block;
+        }
+        .th-enabled {
+          display:inline-block;
+        }
+        .th-cleared {
+          display:inline-block;
+          color:green;
+        }
       }
       .th-chkmrk {
         width: 15px;

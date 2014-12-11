@@ -49,19 +49,42 @@ class PackageCopItemView extends ScrollView
             @div class: 'btn native-key-bindings problem-delete', 'Delete'
             @input class: 'native-key-bindings rename-input', outlet: 'renameInput'
           
+      @div class:'action-horiz', =>
+        @div class:'package-cop-help', outlet:'helpActionss'
+        @div class: 'enable-packages', outlet:'enablePackages', =>
+          @div class: 'enable-packages-hdr', 'Enable Packages:'
+          @div class: 'enable-packages-btns', outlet:'enablePackagesBtns',  =>
+            @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
+            @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
+            @div class: 'btn native-key-bindings btn-sel-all',      'All'
+            @div class: 'btn native-key-bindings btn-sel-none',     'None'
+            @div class: 'btn native-key-bindings btn-sel-save',     'Save'
+            @div class: 'btn native-key-bindings btn-sel-restore',  'Restore'
+        
+        @div class: 'reload-atom', outlet:'reloadAtom', =>
+          @div class: 'reload-atom-hdr', 'Restart:'
+          @div class: 'btn native-key-bindings btn-reload', 'Reload Atom'
+          @label class: 'reload-activate', \
+                        'Activate all enabled on reload', =>
+            @input class:'reload-activate-chkbox', 
+                   type:'checkbox', checked: yes, \
+                   outlet:'reloadActivateChkbox'
+
       @div class:'package-horiz', =>
         @div class:'package-cop-help', outlet:'helpPackages'
-        
         @table class:'packages-table', outlet:'packagesTable', =>
           @tr class:'pkg-hdr-tr', =>
             @th  class:'th-installed', =>
-              @div class:'th-pkgs',       'INSTALLED PACKAGES'
-              # @div class:'th-click',      'Click to enable/disable'
-              @div class:'th-ctrl-click', 'Ctrl-click for web page'
-              @div class:'th-legend loaded',    'Loaded'
-              @div class:'th-legend activated', 'Activated'
-              @div class:'th-enabled',          'Enabled'
-              @div class:'th-cleared',          'Cleared'
+              @div class:'th-pkgs', 'Installed Packages:'
+              @div class:'th-ctrl-click', 
+                    'Click name to enable/disable; Ctrl-click for web page.'
+              @div class:'th-report-click', 
+                    'Click report to delete.'
+              @div class:'th-legend', =>
+                @div class:'th-loaded loaded legend',    'Loaded'
+                @div class:'th-activated activated legend', 'Activated'
+                @div class:'th-enabled legend',   'Enabled'
+                @div class:'th-cleared legend',   'Cleared'
         
             @th class:'th-chkmrk'
             @th class:'th-fails', =>
@@ -69,15 +92,6 @@ class PackageCopItemView extends ScrollView
             @th class:'th-passes', =>
               @span class:'th-passes-label', 'Passed Reports'
               
-        @div class: 'enable-packages', outlet:'enablePackages', =>
-          @div class: 'enable-packages-hdr', 'Enable:'
-          @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
-          @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
-          @div class: 'btn native-key-bindings btn-sel-all',      'All'
-          @div class: 'btn native-key-bindings btn-sel-none',     'None'
-          @div class: 'btn native-key-bindings btn-sel-save',     'Save'
-          @div class: 'btn native-key-bindings btn-sel-restore',  'Restore'
-        
         @div class:'time-popup', outlet:'timePopup'
               
       @div class:'package-cop-help', outlet:'helpAction'
@@ -234,16 +248,18 @@ class PackageCopItemView extends ScrollView
   selectProblem: ($tr) ->
     $trs = @problemsTable.find('tr')
     $trs.removeClass 'selected'
-    $enablePackagesDiv = @find '.enable-packages'
-    $enablePackagesDiv.removeClass 'no-problem'
-    $enablePackagesDiv.removeClass 'one-problem'
+    @enablePackagesBtns.removeClass 'no-problem'
+    @enablePackagesBtns.removeClass 'one-problem'
+    @enablePackagesBtns.removeClass 'gt-one-problem'
     if $trs.length < 3 
       @find('.problem-detail').hide()
-      $enablePackagesDiv.addClass 'no-problem'
+      @enablePackagesBtns.addClass 'no-problem'
       @currentProblem = null
       return
     else if $trs.length is 3 
-      $enablePackagesDiv.addClass 'one-problem'
+      @enablePackagesBtns.addClass 'one-problem'
+    else
+      @enablePackagesBtns.addClass 'gt-one-problem'
     @find('.problem-detail').css display: 'inline-block'
     $tr ?= $trs.eq(1)
     $tr.addClass 'selected'
