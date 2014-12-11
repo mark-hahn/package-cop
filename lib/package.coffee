@@ -49,18 +49,19 @@ class Package
     
   constructor: (@name, @version) ->
     if typeof @name is 'object'
-      {@name, @version, @repoURL, @states} = @name
+      {@name, @version, @repoURL, @states, @savedState} = @name
     else
       @states = {}
-    @packageId = Package.packageIdFromNameVersion @name, @version
-    @title     = Package.titleizeName @name
+    @packageId   = Package.packageIdFromNameVersion @name, @version
+    @title       = Package.titleizeName @name
+    @savedState ?= {state: @getState(), enabled: @getEnabled()}
   
   addVersionToTitle: -> 
     if not @titleHasVersion
       @title += ' (' + @version + ')'
       @titleHasVersion = yes
       
-  trimPropertiesForSave: -> {@name, @version, @repoURL, @states}
+  trimPropertiesForSave: -> {@name, @version, @repoURL, @states, @savedState}
       
   uninstall: ->
     if @name is 'Atom' then return
@@ -105,6 +106,20 @@ class Package
   getStateIfChanged: ->
     prevState = @state
     if @getState() isnt prevState then @state
+    
+  saveState: -> @savedState = {@state, @enabled}
+  getSavedState: -> @savedState
+  restoreState: -> 
+    if @savedState
+      {@state, @enabled} = @savedState
+      switch @state
+        when 'unloaded'  
+          if @loaded() then @deactivate()
+          if @loaded() then @unload()
+        when 'loaded'    then @load(); @deactivate()
+        when 'activated' then @load(); @enable(); @activate()
+      if @enabled then @enable() else @disable()
+    @savedState
   
   getEnabled: -> 
     @enabled = (not @oldVersion and 
@@ -113,10 +128,24 @@ class Package
     prevEnabled = @enabled
     if @getEnabled() isnt prevEnabled then @enabled
     
-  enable:     -> if not @oldVersion then atom.packages.enablePackage     @name
-  disable:    -> if not @oldVersion then atom.packages.disablePackage    @name
-  load:       -> if not @oldVersion then atom.packages.loadPackage       @name
-  unload:     -> if not @oldVersion then atom.packages.unloadPackage     @name
-  activate:   -> if not @oldVersion then atom.packages.activatePackage   @name
-  deactivate: -> if not @oldVersion then atom.packages.deactivatePackage @name
+  enableDisable: (enable) ->
+    if enable
+      @load()
+      @enable()
+      @activate()
+    else 
+      @deactivate()
+      @disable()
+      @unload()
+  
+  enable:     -> if not @oldVersion and @name isnt 'Atom' then atom.packages.enablePackage     @name
+  disable:    -> if not @oldVersion and @name isnt 'Atom' then atom.packages.disablePackage    @name
+  load:       -> if not @oldVersion and @name isnt 'Atom' then atom.packages.loadPackage       @name
+  unload:     -> if not @oldVersion and @name isnt 'Atom' then atom.packages.unloadPackage     @name
+  activate:   -> if not @oldVersion and @name isnt 'Atom' and not @activated()
+                  pack = atom.packages.getLoadedPackage @name
+                  pack.activationDeferred ?= resolve:(->), reject:(->)
+                  pack.activateNow()
+  deactivate: -> if not @oldVersion and @name isnt 'Atom' then atom.packages.deactivatePackage @name
+  
   

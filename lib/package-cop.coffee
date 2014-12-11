@@ -23,6 +23,11 @@ module.exports =
             pane.destroyItem item
       @packageCopItem = new PackageCopItem @
       workspace.activePane.activateItem @packageCopItem
+      
+      # setTimeout =>
+      #   debugger
+      #   atom.packages.activatePackage 'find-selection'
+      # , 3000
 
   getProblems:   -> @dataStore.getProblems()
   getPackages:   -> @dataStore.getPackages()

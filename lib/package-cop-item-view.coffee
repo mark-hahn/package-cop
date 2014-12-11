@@ -2,7 +2,7 @@
   lib/package-cop-item-view.coffee
 ###
 
-fs     = require 'fs'
+fs = require 'fs'
 
 pathUtil = require 'path'
 {$,ScrollView} = require 'atom'
@@ -52,14 +52,6 @@ class PackageCopItemView extends ScrollView
       @div class:'package-horiz', =>
         @div class:'package-cop-help', outlet:'helpPackages'
         
-        @div class: 'enable-packages', =>
-          @div class: 'enable-packages-hdr', 'Enable:'
-          @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
-          @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
-          @div class: 'btn native-key-bindings btn-sel-all',      'All'
-          @div class: 'btn native-key-bindings btn-sel-none',     'None'
-          @div class: 'btn native-key-bindings btn-sel-starred',  'Starred'
-        
         @table class:'packages-table', outlet:'packagesTable', =>
           @tr class:'pkg-hdr-tr', =>
             @th  class:'th-installed', =>
@@ -77,6 +69,15 @@ class PackageCopItemView extends ScrollView
             @th class:'th-passes', =>
               @span class:'th-passes-label', 'Passed Reports'
               
+        @div class: 'enable-packages', outlet:'enablePackages', =>
+          @div class: 'enable-packages-hdr', 'Enable:'
+          @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
+          @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
+          @div class: 'btn native-key-bindings btn-sel-all',      'All'
+          @div class: 'btn native-key-bindings btn-sel-none',     'None'
+          @div class: 'btn native-key-bindings btn-sel-save',     'Save'
+          @div class: 'btn native-key-bindings btn-sel-restore',  'Restore'
+        
         @div class:'time-popup', outlet:'timePopup'
               
       @div class:'package-cop-help', outlet:'helpAction'
@@ -103,8 +104,9 @@ class PackageCopItemView extends ScrollView
     for metadata in atom.packages.getAvailablePackageMetadata().concat {
                     name: 'Atom', version: atom.getVersion()
                     homepage: 'http://atom.io'}
-      {name, version, homepage, repository} = metadata
-      if name is 'package-cop' or atom.packages.isBundledPackage name then continue
+      {name, version, homepage, repository, theme} = metadata
+      if name is 'package-cop' or theme or
+         atom.packages.isBundledPackage name then continue
       packageId = Package.packageIdFromNameVersion name, version
       @packages[packageId] ?= new Package name, version
       @packages[packageId].repoURL = homepage ? repository?.url ? repository
@@ -136,13 +138,16 @@ class PackageCopItemView extends ScrollView
     for packageIdPkgVers in packageArray
       [packageId, pkg] = packageIdPkgVers
       if not pkg then delete @packages[packageId]; continue
-      oldClass = (if pkg.getOldVersion() then ' old' else '')
+      
+      state   = pkg.getState()
+      enabled = (if pkg.getEnabled()    then ' enabled' else '')
+      old     = (if pkg.getOldVersion() then ' old'     else '')
       pkg.$tr = $ """
         <tr class="" data-packageId="#{packageId}"> 
           <td class="dotname">
-            <span class="octicon octicon-dot dot current"></span>
-            <span class="name#{oldClass}">#{pkg.getTitle()}</span>
-          </td> 
+            <span class="octicon octicon-dot dot current #{state}"></span>
+            <span class="name#{old}#{enabled}">#{pkg.getTitle()}</span>
+          </td>
           <td>
             <span class="octicon octicon-check check"></span>
           </td> 
@@ -292,7 +297,51 @@ class PackageCopItemView extends ScrollView
           buttons: ['OK']
         return 
     return name
-    
+
+  enableDisablePackage: (pkg, enable) ->
+    pkg.enableDisable enable
+    $name = pkg.$tr.find '.name'
+    if enable then $name.addClass('enabled') else $name.removeClass('enabled')
+
+  enableAutoSetup: ->
+    @packageCopItem.saveDataStore()
+    false
+  enableAutoAllSetup: ->
+    @packageCopItem.saveDataStore()
+    false
+  enableAllSetup: -> 
+    for packageId, pkg of @packages
+      @enableDisablePackage pkg, yes
+    @packageCopItem.saveDataStore()
+    false
+  enableNoneSetup: ->
+    for packageId, pkg of @packages
+      @enableDisablePackage pkg, no
+    @packageCopItem.saveDataStore()
+    false
+  enableSaveSetup:  ->
+    for packageId, pkg of @packages
+      pkg.saveState()
+    @packageCopItem.saveDataStore()
+    false
+  enableRestoreSetup: ->
+    for packageId, pkg of @packages
+      {state, enabled} = pkg.getSavedState()
+      if (pkg.getState()   isnt state or
+          pkg.getEnabled() isnt enabled) and
+         (restoreState = pkg.restoreState())
+        {state, enabled} = restoreState
+        $dot  = pkg.$tr.find '.dot'
+        $dot.removeClass 'unloaded'
+        $dot.removeClass 'loaded'
+        $dot.removeClass 'activated'
+        $dot.addClass state
+        $name = pkg.$tr.find '.name'
+        if enabled then $name.addClass('enabled')
+        else $name.removeClass('enabled')
+    @packageCopItem.saveDataStore()
+    false
+
   setupEvents: ->
     @subs.push @problemsTable.on 'keypress', 'input.new-problem-input', (e) => 
       if e.which is 13
@@ -345,7 +394,14 @@ class PackageCopItemView extends ScrollView
     
     @subs.push @problemDetail.on 'click', '.problem-delete', =>
       @deleteSelectedProblem()
-
+      
+    @subs.push @enablePackages.on 'click', '.btn-sel-auto',      => @enableAutoSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-auto-all',  => @enableAutoAllSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-all',       => @enableAllSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-none',      => @enableNoneSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-save',      => @enableSaveSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-restore',   => @enableRestoreSetup()
+  
     @subs.push @packagesTable.on 'click', 'td.dotname', (e) =>
       $tr = $(e.target).closest('tr')
       packageId = $tr.attr 'data-packageId'
@@ -362,19 +418,8 @@ class PackageCopItemView extends ScrollView
           @packages[packageId].openURL()
         return
         
-      if pkg.getOldVersion() or pkg.name is 'Atom' then return
-      
-      $name = $tr.find '.name'
-      if pkg.getEnabled()
-        pkg.deactivate()
-        pkg.disable()
-        pkg.unload()
-        $name.removeClass('enabled')
-      else 
-        pkg.load()
-        pkg.enable()
-        pkg.activate()
-        $name.addClass('enabled')
+      if not pkg.getOldVersion() and pkg.name isnt 'Atom'
+        @enableDisablePackage pkg, not pkg.getEnabled()
         
     @subs.push @packagesTable.on 'mouseover', 'span.report', (e) =>
       $tgt = $ e.target
