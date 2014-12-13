@@ -91,7 +91,11 @@
             font-size:16px;
           }
         }
-        .problem-hdr-summary {
+        .problem-hdr-summary .allCleared {
+          color: red;
+        }
+        .problem-hdr-summary .conflicted {
+          color: red;
         }
       }
       .report-result {
@@ -334,7 +338,13 @@
           font-weight: bold;
         }
         span.check {
+          color: @syntax-background-color;
+        }
+        span.check.cleared {
           color: lighten(green, 10%); 
+        }
+        span.check.conflicted {
+          color: lighten(red, 10%); 
         }
         .fails-dot,.passes-dot {
           cursor: pointer;
@@ -371,9 +381,12 @@
     border: 1px solid @button-border-color;
     background-color: @button-background-color-hover;
   }
-  .octicon.octicon-check {&:before{content: @check}}
-  .octicon.octicon-star  {&:before{content: @star }}
-  .octicon.octicon-dot   {&:before{content: @primitive-dot}}
+  .octicon.octicon-check        {&:before{content: @check         }}
+  .octicon.octicon-x            {&:before{content: @x             }}
+  .octicon.octicon-question     {&:before{content: @question      }}
+  .octicon.octicon-dot          {&:before{content: @primitive-dot }}
+  .octicon.octicon-star         {&:before{content: @star          }}
+  .octicon.octicon-circle-slash {&:before{content: @circle-slash  }}
 }
 
 

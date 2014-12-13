@@ -6,7 +6,6 @@
 
 shell      = require 'shell'
 {execSync} = require 'child_process'
-Problem    = require './problem'
 
 module.exports = 
 class Package
@@ -56,11 +55,11 @@ class Package
     
   constructor: (@name, @version) ->
     if typeof @name is 'object'
-      {@name, @version, @repoURL, @states, @savedState} = @name
-    else
-      @states = {}
+      {@name, @version, @repoURL, @states, @savedState, @cleared} = @name
     @packageId   = Package.packageIdFromNameVersion @name, @version
     @title       = Package.titleizeName @name
+    @states     ?= {}
+    @cleared    ?= {}
     if not @savedState then @saveState()
   
   addVersionToTitle: -> 
@@ -68,7 +67,8 @@ class Package
       @title += ' (' + @version + ')'
       @titleHasVersion = yes
       
-  trimPropertiesForSave: -> {@name, @version, @repoURL, @states, @savedState}
+  trimPropertiesForSave: -> 
+    {@name, @version, @repoURL, @states, @cleared, @savedState}
       
   uninstall: ->
     if @name is 'Atom' then return

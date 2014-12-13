@@ -8,6 +8,7 @@ pathUtil = require 'path'
 {$,ScrollView} = require 'atom'
 marked = require 'marked'
 moment = require 'moment'
+_      = require 'underscore'
 
 Problem = require './problem'
 Package = require './package'
@@ -35,8 +36,10 @@ class PackageCopItemView extends ScrollView
             @div class: 'problem-hdr-hdr', =>
               @div class: 'problem-name', outlet: 'problemName'
             @div class: 'problem-hdr-summary', =>
-              @div class: 'last-report',        outlet: 'lastReport'
-              @div class: 'resolution',         outlet: 'resolution'
+              @div class: 'last-report', outlet: 'lastReport'
+              @div class: 'resolution', =>
+                @span class: 'cleared',    outlet: 'cleared'
+                @span class: 'conflicted', outlet: 'conflicted'
               
           @div class: 'report-result', =>
             @div class: 'report-result-hdr', 'Report Result:'
@@ -54,12 +57,12 @@ class PackageCopItemView extends ScrollView
         @div class: 'enable-packages', outlet:'enablePackages', =>
           @div class: 'enable-packages-hdr', 'Enable Packages:'
           @div class: 'enable-packages-btns', outlet:'enablePackagesBtns',  =>
-            @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
-            @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
             @div class: 'btn native-key-bindings btn-sel-all',      'All'
             @div class: 'btn native-key-bindings btn-sel-none',     'None'
             @div class: 'btn native-key-bindings btn-sel-save',     'Save'
             @div class: 'btn native-key-bindings btn-sel-restore',  'Restore'
+            @div class: 'btn native-key-bindings btn-sel-auto-all', 'Test All Problems'
+            @div class: 'btn native-key-bindings btn-sel-auto',     'Test Problem (Bisect)'
         
         @div class: 'reload-atom', =>
           @div class: 'reload-atom-hdr', 'Restart:'
@@ -81,10 +84,10 @@ class PackageCopItemView extends ScrollView
               @div class:'th-report-click', 
                     'Click report to delete.'
               @div class:'th-legend', =>
-                @div class:'th-loaded loaded legend',    'Loaded'
+                @div class:'th-loaded loaded legend',       'Loaded'
                 @div class:'th-activated activated legend', 'Activated'
-                @div class:'th-enabled legend',   'Enabled'
-                @div class:'th-cleared legend',   'Cleared'
+                @div class:'th-enabled legend',             'Enabled'
+                @div class:'th-cleared legend',             'Cleared'
         
             @th class:'th-chkmrk'
             @th class:'th-fails', =>
@@ -163,7 +166,7 @@ class PackageCopItemView extends ScrollView
             <span class="name#{old}#{enabled}">#{pkg.getTitle()}</span>
           </td>
           <td>
-            <span class="octicon octicon-check check"></span>
+            <span class="octicon check"></span>
           </td> 
           <td class="fails"></td> 
           <td class="passes"></td> 
@@ -172,8 +175,9 @@ class PackageCopItemView extends ScrollView
       @packagesTable.append pkg.$tr
       
     @packageCopItem.saveDataStore()
-    @selectProblem()
     
+    @selectProblem()
+
     @chkActivatedInterval = setInterval =>
       for packageId, pkg of @packages
         if (state = pkg.getStateIfChanged())
@@ -255,6 +259,7 @@ class PackageCopItemView extends ScrollView
       @find('.problem-detail').hide()
       @enablePackagesBtns.addClass 'no-problem'
       @currentProblem = null
+      @updateChecked yes
       return
     else if $trs.length is 3 
       @enablePackagesBtns.addClass 'one-problem'
@@ -264,11 +269,11 @@ class PackageCopItemView extends ScrollView
     $tr ?= $trs.eq(1)
     $tr.addClass 'selected'
     problemid = $tr.attr 'data-problemid'
-    @currentProblem =  @problems[problemid]
+    @currentProblem = @problems[problemid]
     @problemName.text @currentProblem.name
     @setLastReport()
-    @resolution.text 'Packages Cleared: 0/0, 0%'
-    
+    @updateChecked()
+
     states = []
     @reports = @currentProblem.getReports()
     for reportId, failed of @reports
@@ -281,24 +286,57 @@ class PackageCopItemView extends ScrollView
         [reportId, failed] = state
         state = pkg.getStates()[reportId] ? 'no-state'
         @addReportDot $tr, failed, state, reportId
+
+  updateChecked: (clearChecks) ->
+    @packagesTable.find('.check')
+      .removeClass 'cleared conflicted octicon-check octicon-x'
+    if clearChecks then return
+    
+    pkgChecks = @currentProblem.calcCleared @packages
+    numCleared = numConflicted = 0
+    for packageId, pkg of @packages
+      $check = pkg.$tr.find '.check'
+      pkgCheck = pkgChecks[packageId]
+      if pkgCheck
+        switch pkgCheck
+          when 'cleared'    
+            numCleared++
+            $check.addClass 'octicon-check cleared'
+          when 'conflicted' 
+            numConflicted++
+            $check.addClass 'octicon-x conflicted'
+    numPkgs = _.size @packages
+    percent = Math.round numCleared * 100 / numPkgs
+    if percent is 100
+      @cleared.addClass    'allCleared' 
+    else
+      @cleared.removeClass 'allCleared'
+    @cleared.text \ 
+      "Packages Cleared: #{numCleared}/#{numPkgs}, #{percent}%" + 
+      (if numConflicted then ', ' else '')
+    @conflicted.text \
+      (if numConflicted then numConflicted + ' Conflicted' else '')
     
   addReportDot: ($tr, failed, state, reportId) ->
-      tdClass = (if failed then 'fails' else 'passes')
-      $td = $tr.find 'td.' + tdClass
-      $td.append '<span data-reportid="' + reportId + '" ' +
-        'class="' + tdClass + '-dot ' + state + ' report' +
-        (switch state
-           when 'no-state' then '">&nbsp;</span>'
-           when 'unloaded' then '">-</span>'
-           else ' octicon octicon-dot"></span>')
-
+    tdClass = (if failed then 'fails' else 'passes')
+    $td = $tr.find 'td.' + tdClass
+    $td.append '<span data-reportid="' + reportId + '" ' +
+      'class="' + tdClass + '-dot ' + state + ' report' +
+      (switch state
+         when 'no-state' then '">&nbsp;</span>'
+         when 'unloaded' then '">-</span>'
+         else ' octicon octicon-dot"></span>')
+      
   deleteReport: (reportId, dontSave) ->
-    @packagesTable.find('span.report[data-reportid="' + reportId + '"]').remove()
+    @packagesTable
+      .find('span.report[data-reportid="' + reportId + '"]')
+      .remove()
     delete @reports[reportId]
     for packageId, pkg of @packages
       delete pkg.getStates()[reportId]
     if not dontSave
       @packageCopItem.saveDataStore()
+      @updateChecked()
     
   getProblemName: ($inp, sameAsSelOK) ->
     if not /\w/.test (name = $inp.val()) then return
@@ -391,6 +429,7 @@ class PackageCopItemView extends ScrollView
         packageId = $tr.attr 'data-packageId'
         @packages[packageId].getStates()[reportId] = state
       @packageCopItem.saveDataStore()
+      @updateChecked()
 
     @subs.push @problemDetail.on 'click', '.problem-rename', =>
       @renameSelectedProblem()
