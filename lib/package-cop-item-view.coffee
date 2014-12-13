@@ -305,12 +305,16 @@ class PackageCopItemView extends ScrollView
           when 'conflicted' 
             numConflicted++
             $check.addClass 'octicon-x conflicted'
+      else pkgNotChecked = pkg
     numPkgs = _.size @packages
     percent = Math.round numCleared * 100 / numPkgs
-    if percent is 100
-      @cleared.addClass    'allCleared' 
-    else
-      @cleared.removeClass 'allCleared'
+    @cleared.removeClass 'all-cleared found-it'
+    if percent is 100 then @cleared.addClass 'all-cleared' 
+    if numCleared is numPkgs-1 and numConflicted is 0
+      @cleared.text 'Package causing problem: ' + pkgNotChecked.name
+      @cleared.addClass 'found-it'
+      @conflicted.text ''
+      return
     @cleared.text \ 
       "Packages Cleared: #{numCleared}/#{numPkgs}, #{percent}%" + 
       (if numConflicted then ', ' else '')
