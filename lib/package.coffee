@@ -11,6 +11,13 @@ Problem    = require './problem'
 module.exports = 
 class Package
   
+  @activateAllLoaded = ->
+    for pack in atom.packages.getLoadedPackages()
+      if not pack.mainActivated
+        pack.activationDeferred ?= resolve:(->), reject:(->)
+        pack.activateNow()
+    null
+    
   @nameIsValid = (name) ->
     if name is 'Atom' then return yes
     if /[^\-\w]/.test name
@@ -54,7 +61,7 @@ class Package
       @states = {}
     @packageId   = Package.packageIdFromNameVersion @name, @version
     @title       = Package.titleizeName @name
-    @savedState ?= {state: @getState(), enabled: @getEnabled()}
+    if not @savedState then @saveState()
   
   addVersionToTitle: -> 
     if not @titleHasVersion
@@ -106,19 +113,14 @@ class Package
   getStateIfChanged: ->
     prevState = @state
     if @getState() isnt prevState then @state
-    
-  saveState: -> @savedState = {@state, @enabled}
+  
+  saveState: -> @savedState = {state: @getState(), enabled: @getEnabled()}
   getSavedState: -> @savedState
   restoreState: -> 
-    if @savedState
-      {@state, @enabled} = @savedState
-      switch @state
-        when 'unloaded'  
-          if @loaded() then @deactivate()
-          if @loaded() then @unload()
-        when 'loaded'    then @load(); @deactivate()
-        when 'activated' then @load(); @enable(); @activate()
-      if @enabled then @enable() else @disable()
+    {state, enabled} = @savedState
+    @enableDisable enabled
+    if enabled then @enable() 
+    else            @disable()
     @savedState
   
   getEnabled: -> 
@@ -137,15 +139,38 @@ class Package
       @deactivate()
       @disable()
       @unload()
+      
+  fail: (e, action) ->
+    console.log 'package-cop: package', @name, 'failed to', action + '.',
+                 e.message + '. Please submit an issue to the package repo.'
   
-  enable:     -> if not @oldVersion and @name isnt 'Atom' then atom.packages.enablePackage     @name
-  disable:    -> if not @oldVersion and @name isnt 'Atom' then atom.packages.disablePackage    @name
-  load:       -> if not @oldVersion and @name isnt 'Atom' then atom.packages.loadPackage       @name
-  unload:     -> if not @oldVersion and @name isnt 'Atom' then atom.packages.unloadPackage     @name
+  enable:     -> if not @oldVersion and @name isnt 'Atom' and not @getEnabled()
+                  atom.packages.enablePackage @name
+  disable:    -> if not @oldVersion and @name isnt 'Atom' and @getEnabled()
+                  atom.packages.disablePackage @name
+  load:       -> if not @oldVersion and @name isnt 'Atom' and not @loaded()
+                  try
+                    atom.packages.loadPackage @name
+                  catch e
+                    @fail e, 'load'
+  unload:     -> if not @oldVersion and @name isnt 'Atom' and @loaded()
+                  @deactivate()
+                  try
+                    atom.packages.unloadPackage @name
+                  catch e
+                    @fail e, 'unload'
   activate:   -> if not @oldVersion and @name isnt 'Atom' and not @activated()
-                  pack = atom.packages.getLoadedPackage @name
-                  pack.activationDeferred ?= resolve:(->), reject:(->)
-                  pack.activateNow()
-  deactivate: -> if not @oldVersion and @name isnt 'Atom' then atom.packages.deactivatePackage @name
+                  @load()
+                  try
+                    pack = atom.packages.getLoadedPackage @name
+                    pack.activationDeferred ?= resolve:(->), reject:(->)
+                    pack.activateNow()
+                  catch e
+                    @fail e, 'activate'
+  deactivate: -> if not @oldVersion and @name isnt 'Atom' and @activated()
+                  try
+                    atom.packages.deactivatePackage @name
+                  catch e
+                    @fail e, 'deactivate'
   
   

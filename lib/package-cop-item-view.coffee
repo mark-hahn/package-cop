@@ -61,13 +61,13 @@ class PackageCopItemView extends ScrollView
             @div class: 'btn native-key-bindings btn-sel-save',     'Save'
             @div class: 'btn native-key-bindings btn-sel-restore',  'Restore'
         
-        @div class: 'reload-atom', outlet:'reloadAtom', =>
+        @div class: 'reload-atom', =>
           @div class: 'reload-atom-hdr', 'Restart:'
-          @div class: 'btn native-key-bindings btn-reload', 'Reload Atom'
+          @div class: 'btn native-key-bindings btn-reload', \
+               outlet:'reloadAtom', 'Reload Atom'
           @label class: 'reload-activate', \
                         'Activate all enabled on reload', =>
-            @input class:'reload-activate-chkbox', 
-                   type:'checkbox', checked: yes, \
+            @input class:'reload-activate-chkbox', type:'checkbox', \
                    outlet:'reloadActivateChkbox'
 
       @div class:'package-horiz', =>
@@ -189,7 +189,7 @@ class PackageCopItemView extends ScrollView
     , 1000
     
     @setupEvents()
-    
+  
   addProblemToTable: (prb, reverse) -> 
     $tr = @problemsTable.find 'tr:last'
     $newTr = $tr.clone()
@@ -343,11 +343,10 @@ class PackageCopItemView extends ScrollView
   enableRestoreSetup: ->
     for packageId, pkg of @packages
       {state, enabled} = pkg.getSavedState()
-      if (pkg.getState()   isnt state or
-          pkg.getEnabled() isnt enabled) and
-         (restoreState = pkg.restoreState())
-        {state, enabled} = restoreState
-        $dot  = pkg.$tr.find '.dot'
+      if pkg.getState()   isnt state or
+         pkg.getEnabled() isnt enabled
+        pkg.restoreState()
+        $dot = pkg.$tr.find '.dot'
         $dot.removeClass 'unloaded'
         $dot.removeClass 'loaded'
         $dot.removeClass 'activated'
@@ -417,6 +416,13 @@ class PackageCopItemView extends ScrollView
     @subs.push @enablePackages.on 'click', '.btn-sel-none',      => @enableNoneSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-save',      => @enableSaveSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-restore',   => @enableRestoreSetup()
+    
+    @reloadActivateChkbox.on 'change', (e) =>
+      @packageCopItem.setReloadActivateFlag $(e.target).is ':checked'
+      
+    @subs.push @reloadAtom.on 'click', => 
+      @packageCopItem.setReloadedFromThisPackageFlag yes
+      $('body').trigger 'window:reload'
   
     @subs.push @packagesTable.on 'click', 'td.dotname', (e) =>
       $tr = $(e.target).closest('tr')
@@ -446,7 +452,7 @@ class PackageCopItemView extends ScrollView
                   timeMoment.format('ddd')                 + '&nbsp; &nbsp;' +
                   timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
                   timeMoment.fromNow()
-             
+      setTimeout (=> @timePopup.hide()), 2500
     @subs.push @packagesTable.on 'mouseout', 'span.report', =>
       @timePopup.hide()
       
