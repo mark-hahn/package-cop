@@ -166,7 +166,7 @@ class PackageCopItemView extends ScrollView
             <span class="name#{old}#{enabled}">#{pkg.getTitle()}</span>
           </td>
           <td>
-            <span class="octicon check"></span>
+            <span class="octicon octicon-check check"></span>
           </td> 
           <td class="fails"></td> 
           <td class="passes"></td> 
@@ -289,37 +289,24 @@ class PackageCopItemView extends ScrollView
 
   updateChecked: (clearChecks) ->
     @packagesTable.find('.check')
-      .removeClass 'cleared conflicted octicon-check octicon-x'
+      .removeClass 'cleared'
     if clearChecks then return
     
-    pkgChecks = @currentProblem.calcCleared @packages
-    numCleared = numConflicted = 0
+    numCleared = 0
     for packageId, pkg of @packages
-      $check = pkg.$tr.find '.check'
-      pkgCheck = pkgChecks[packageId]
-      if pkgCheck
-        switch pkgCheck
-          when 'cleared'    
-            numCleared++
-            $check.addClass 'octicon-check cleared'
-          when 'conflicted' 
-            numConflicted++
-            $check.addClass 'octicon-x conflicted'
-      else pkgNotChecked = pkg
+      if @isCleared pkg, @currentProblem
+        numCleared++
+        pkg.$tr.find('.check').addClass 'cleared'
+      else nameNotCleared = pkg.name
     numPkgs = _.size @packages
     percent = Math.round numCleared * 100 / numPkgs
     @cleared.removeClass 'all-cleared found-it'
-    if percent is 100 then @cleared.addClass 'all-cleared' 
-    if numCleared is numPkgs-1 and numConflicted is 0
-      @cleared.text 'Package causing problem: ' + pkgNotChecked.name
-      @cleared.addClass 'found-it'
-      @conflicted.text ''
-      return
-    @cleared.text \ 
-      "Packages Cleared: #{numCleared}/#{numPkgs}, #{percent}%" + 
-      (if numConflicted then ', ' else '')
-    @conflicted.text \
-      (if numConflicted then numConflicted + ' Conflicted' else '')
+    if numCleared is numPkgs then @cleared.addClass 'all-cleared' 
+    if numCleared is numPkgs-1
+      @cleared.text 'Package causing problem: ' + nameNotCleared
+              .addClass 'found-it'
+    else @cleared.text \ 
+      "Packages Cleared: #{numCleared}/#{numPkgs}, #{percent}%"
     
   addReportDot: ($tr, failed, state, reportId) ->
     tdClass = (if failed then 'fails' else 'passes')
@@ -361,12 +348,6 @@ class PackageCopItemView extends ScrollView
     $name = pkg.$tr.find '.name'
     if enable then $name.addClass('enabled') else $name.removeClass('enabled')
 
-  enableAutoSetup: ->
-    @packageCopItem.saveDataStore()
-    false
-  enableAutoAllSetup: ->
-    @packageCopItem.saveDataStore()
-    false
   enableAllSetup: -> 
     for packageId, pkg of @packages
       @enableDisablePackage pkg, yes
@@ -396,6 +377,30 @@ class PackageCopItemView extends ScrollView
         $name = pkg.$tr.find '.name'
         if enabled then $name.addClass('enabled')
         else $name.removeClass('enabled')
+    @packageCopItem.saveDataStore()
+    false
+    
+  isCleared: (pkg, problem) ->
+    cleared = no
+    for reportId, failed of problem.reports
+      state = pkg.states[reportId]
+      if state is   'activated' and not failed or
+         state isnt 'activated' and     failed
+        return yes
+    no
+    
+  anyProblemNotCleared: (pkg) ->
+    for problemId, problem of @problems
+      if not @isCleared pkg, problem then return true
+    false
+        
+  enableAutoSetup: (allProblems) ->
+    flip = no
+    for packageId, pkg of @packages
+      notCleared = (if allProblems then @anyProblemNotCleared pkg \
+                    else not @isCleared pkg, @currentProblem)
+      if notCleared and (flip = not flip)
+        pkg.enableDisable not pkg.getEnabled()
     @packageCopItem.saveDataStore()
     false
 
@@ -453,12 +458,12 @@ class PackageCopItemView extends ScrollView
     @subs.push @problemDetail.on 'click', '.problem-delete', =>
       @deleteSelectedProblem()
       
-    @subs.push @enablePackages.on 'click', '.btn-sel-auto',      => @enableAutoSetup()
-    @subs.push @enablePackages.on 'click', '.btn-sel-auto-all',  => @enableAutoAllSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-all',       => @enableAllSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-none',      => @enableNoneSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-save',      => @enableSaveSetup()
     @subs.push @enablePackages.on 'click', '.btn-sel-restore',   => @enableRestoreSetup()
+    @subs.push @enablePackages.on 'click', '.btn-sel-auto-all',  => @enableAutoSetup yes
+    @subs.push @enablePackages.on 'click', '.btn-sel-auto',      => @enableAutoSetup no
     
     @reloadActivateChkbox.on 'change', (e) =>
       @packageCopItem.setReloadActivateFlag $(e.target).is ':checked'

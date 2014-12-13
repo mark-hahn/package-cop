@@ -55,11 +55,10 @@ class Package
     
   constructor: (@name, @version) ->
     if typeof @name is 'object'
-      {@name, @version, @repoURL, @states, @savedState, @cleared} = @name
+      {@name, @version, @repoURL, @states, @savedState} = @name
     @packageId   = Package.packageIdFromNameVersion @name, @version
     @title       = Package.titleizeName @name
     @states     ?= {}
-    @cleared    ?= {}
     if not @savedState then @saveState()
   
   addVersionToTitle: -> 
@@ -68,7 +67,7 @@ class Package
       @titleHasVersion = yes
       
   trimPropertiesForSave: -> 
-    {@name, @version, @repoURL, @states, @cleared, @savedState}
+    {@name, @version, @repoURL, @states, @savedState}
       
   uninstall: ->
     if @name is 'Atom' then return

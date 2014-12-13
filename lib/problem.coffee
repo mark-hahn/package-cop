@@ -25,19 +25,3 @@ class Problem
       maxTime = Math.max maxTime, reportId
     maxTime
     
-  calcCleared: (packages) ->
-    pkgChecks = {}
-    for packageId, pkg of packages
-      haveFailClear = no
-      havePassClear = no
-      for reportId, failed of @reports
-        state = pkg.states[reportId]
-        if state is   'activated' and not failed then havePassClear = yes
-        if state isnt 'activated' and     failed then haveFailClear = yes
-        if haveFailClear and havePassClear 
-          pkgChecks[packageId] = 'conflicted'
-          break
-      if not pkgChecks[packageId] and (haveFailClear or havePassClear)
-        pkgChecks[packageId] = 'cleared'
-    pkgChecks
-    
