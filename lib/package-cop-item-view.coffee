@@ -98,9 +98,9 @@ class PackageCopItemView extends ScrollView
               
   initialize: (@packageCopItem) ->
     @subs = []
-    @problems     = @packageCopItem.getProblems()
-    @packages     = @packageCopItem.getPackages()
-    @reports      = null
+    @problems = @packageCopItem.getProblems()
+    @packages = @packageCopItem.getPackages()
+    @reports  = null
     @setHelpBtn no
     
     problemList = []
@@ -111,14 +111,12 @@ class PackageCopItemView extends ScrollView
     if (_.size @problems) is 0
       $tr = @problemsTable.find('input.new-problem-input').closest 'tr'
       @addProblem 'Untitled', $tr
-    
-    setInterval =>
-      helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
-      regex = new RegExp '\\<([^>]+)\\>([^<]*)\\<', 'g'
-      while (match = regex.exec helpMD)
-        @[match[1]].html marked match[2]
-        --regex.lastIndex
-    , 1000
+      
+    helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
+    regex = new RegExp '\\<([^>]+)\\>([^<]*)\\<', 'g'
+    while (match = regex.exec helpMD)
+      @[match[1]].html marked match[2]
+      --regex.lastIndex
     
     for metadata in atom.packages.getAvailablePackageMetadata().concat {
                     name: 'Atom', version: atom.getVersion()

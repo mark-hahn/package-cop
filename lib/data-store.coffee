@@ -17,7 +17,7 @@ dataPath = pathUtil.join(home, '.atom', '.package-cop.json')
 module.exports =
 class DataStore
   
-  constructor: () ->
+  constructor: () -> 
     
   chkReloadActivateFlag: ->
     @reload()
@@ -33,8 +33,6 @@ class DataStore
       @saveDataStore()
     res
     
-  getHideHelpFlag: -> @reload(); @hideHelpFlag
-    
   reload: (firstLoad) ->
     data = try
       JSON.parse fs.readFileSync dataPath, 'utf8'
@@ -42,23 +40,28 @@ class DataStore
       if not firstLoad
         console.log 'package-cop: unable to load stored data', e.message
       {problems: {}, packages: {}}
-      
-    @problems = data.problems
-    for problemId, problemData of @problems
+    
+    @problems ?= {}
+    for problemId, problemData of data.problems
       @problems[problemId] = new Problem problemData
       
-    @packages = data.packages
-    for packageId, packageData of @packages
+    @packages ?= {}
+    for packageId, packageData of data.packages
       @packages[packageId] = new Package packageData
     @packages = Package.removeUninstalled @packages
     
     @reloadActivateFlag          = data.reloadActivateFlag
     @reloadedFromThisPackageFlag = data.reloadedFromThisPackageFlag
     @hideHelpFlag                = data.hideHelpFlag
+    @saveDataStore()
   
-  getProblems: -> @problems
+  getProblems: ->
+    @problems
+    
   getPackages: -> @packages
   
+  getHideHelpFlag: -> @reload(); @hideHelpFlag
+    
   setHideHelpFlag: (val) -> 
     @hideHelpFlag = val
     @saveDataStore()
@@ -79,14 +82,13 @@ class DataStore
       @reloadedFromThisPackageFlag
       @hideHelpFlag
     }
-    console.log '_.size data.problems', _.size data.problems
     for packageId, pkg of @packages
       data.packages[packageId] = pkg.trimPropertiesForSave()
     try
       fs.writeFileSync dataPath, JSON.stringify data
     catch e
       atom.confirm 
-        message: 'package-cop: error saving test data'
+        message: 'package-cop: error saving data'
         detailedMessage: e.message
         buttons: ['OK']
   
