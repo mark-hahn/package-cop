@@ -19,7 +19,7 @@ module.exports =
       setTimeout (=>@openItem()), 100
       
     atom.workspaceView.command 'package-cop:open', => @openItem()
-      
+    
   openItem: ->
       @dataStore.reload yes
       workspace = atom.workspace
@@ -33,10 +33,15 @@ module.exports =
   getProblems:   -> @dataStore.getProblems()
   getPackages:   -> @dataStore.getPackages()
   saveDataStore: -> @dataStore.saveDataStore()
+  
   setReloadActivateFlag: (val) -> 
     @dataStore.setReloadActivateFlag val
   setReloadedFromThisPackageFlag: (val) -> 
     @dataStore.setReloadedFromThisPackageFlag val
+  setHideHelpFlag: (val) -> 
+    @dataStore.setHideHelpFlag val
+  getHideHelpFlag: -> 
+    @dataStore.getHideHelpFlag()
 
   deactivate: ->
     @packageCopItem.destroy()

@@ -18,8 +18,11 @@ class PackageCopItemView extends ScrollView
   
   @content: ->
     @div class:'package-cop-item-view', tabIndex:-1, =>
-      @div class:'package-cop-title', 
-                 '__________ Package Cop __________'
+      @div class: 'package-cop-hdr', =>
+        @div class:'package-cop-title', 
+                   '__________ Package Cop __________'
+        @div class:'btn native-key-bindings help-btn', outlet:'helpBtn'
+        
       @div class:'package-cop-help', outlet:'helpHeader'
       
       @div class:'problem-horiz', =>
@@ -53,7 +56,7 @@ class PackageCopItemView extends ScrollView
             @input class: 'native-key-bindings rename-input', outlet: 'renameInput'
           
       @div class:'action-horiz', =>
-        @div class:'package-cop-help', outlet:'helpActionss'
+        @div class:'package-cop-help', outlet:'helpActions'
         @div class: 'enable-packages', outlet:'enablePackages', =>
           @div class: 'enable-packages-hdr', 'Enable Packages:'
           @div class: 'enable-packages-btns', outlet:'enablePackagesBtns',  =>
@@ -79,10 +82,6 @@ class PackageCopItemView extends ScrollView
           @tr class:'pkg-hdr-tr', =>
             @th  class:'th-installed', =>
               @div class:'th-pkgs', 'Installed Packages:'
-              @div class:'th-ctrl-click', 
-                    'Click name to enable/disable; Ctrl-click for web page.'
-              @div class:'th-report-click', 
-                    'Click report to delete.'
               @div class:'th-legend', =>
                 @div class:'th-loaded loaded legend',       'Loaded'
                 @div class:'th-activated activated legend', 'Activated'
@@ -97,26 +96,25 @@ class PackageCopItemView extends ScrollView
               
         @div class:'time-popup', outlet:'timePopup'
               
-      @div class:'package-cop-help', outlet:'helpAction'
-      @div class:'package-cop-help', outlet:'helpMethodology'
-  
   initialize: (@packageCopItem) ->
     @subs = []
-    @problems = @packageCopItem.getProblems()
-    @packages = @packageCopItem.getPackages()
-    @reports  = null
+    @problems     = @packageCopItem.getProblems()
+    @packages     = @packageCopItem.getPackages()
+    @reports      = null
+    @setHelpBtn no
     
     problemList = []
     for problemId, prb of @problems then problemList.push prb
     problemList.sort (prba, prbb) -> prba.getLatestReportTime() - prbb.getLatestReportTime()
     for problem in problemList then @addProblemToTable problem, true
     
-    if atom.config.get 'package-cop.showHelpText'
+    setInterval =>
       helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
       regex = new RegExp '\\<([^>]+)\\>([^<]*)\\<', 'g'
       while (match = regex.exec helpMD)
         @[match[1]].html marked match[2]
         --regex.lastIndex
+    , 1000
     
     for metadata in atom.packages.getAvailablePackageMetadata().concat {
                     name: 'Atom', version: atom.getVersion()
@@ -404,7 +402,23 @@ class PackageCopItemView extends ScrollView
     @packageCopItem.saveDataStore()
     false
 
+  setHelpBtn: (flip) ->
+    hide = @packageCopItem.getHideHelpFlag() 
+    if flip then hide = not hide
+    $help = @.find('.package-cop-help')
+    if hide
+      @helpBtn.text 'Show Help'
+      $help.addClass 'hidden'
+    else 
+      @helpBtn.text 'Hide Help'
+      $help.removeClass 'hidden'
+    hide
+    
   setupEvents: ->
+    @subs.push  @helpBtn.on 'click', =>
+      hideHelp = @setHelpBtn yes
+      @packageCopItem.setHideHelpFlag hideHelp
+    
     @subs.push @problemsTable.on 'keypress', 'input.new-problem-input', (e) => 
       if e.which is 13
         $tr = $(e.target).closest 'tr'

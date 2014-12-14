@@ -10,23 +10,37 @@
   padding: 10px 20px 20px 30px;
   overflow: scroll;
   
-  .package-cop-title {
-    font-size: 18px;
-    font-weight: bold;
-    font-style: italic;
-    width:100%;
+  .package-cop-hdr {
+    min-width:720px;
+    position:relative;
+    margin-bottom:15px;
+    
+    .package-cop-title {
+      width:500px;
+      font-size: 18px;
+      font-weight: bold;
+      font-style: italic;
+    }
+    .help-btn {
+      position:absolute;
+      left:639px;
+      top:0;
+    }
   }
   .package-cop-help {
+    width:720px;
     font-size: 14px;
+  }
+  .package-cop-help.hidden {
+    display:none;
   }
   .problem-horiz {
     position:relative;
-    height:143px;
     width: 720px;
     margin: 20px 0 20px 0;
     
     .problems-table {
-      position:absolute;
+      position:relative;
       padding:10px; 
       border:1px solid gray;
       border-radius: 3px;
@@ -69,8 +83,8 @@
     }
     .problem-detail {
       position: absolute;
-      top: 0;
-      left: 250px;
+      bottom: 5px;
+      right: 5px;
       min-width: 440px;
       height: 143px;
       margin-left: 25px;
@@ -165,7 +179,6 @@
   }
   .action-horiz {
     position:relative;
-    height:60px;
     width:715px;
     margin: 20px 0 20px 0;
     
@@ -173,15 +186,12 @@
       margin:2px;
     }
     .enable-packages {
-      clear:both;
-      float:left;
-      left: 0;
       padding-left: 10px;
       padding-right:4px;
       height: 62px;
       border: 1px solid gray;
       border-radius: 3px;
-      
+      display:inline-block;
       .enable-packages-hdr {
         position: relative;
         top:2px;
@@ -203,11 +213,11 @@
       }
     }
     .reload-atom {
-      position:relative;
-      float:right;
+      position:absolute;
+      right:0;
+      bottom:0;
       width:210px;
       height:62px;
-      margin: 0 0 10px 10px;
       border: 1px solid gray;
       border-radius: 3px;
       
@@ -235,18 +245,15 @@
     }
   }
   .package-horiz {
-    clear: both;
     position: relative;
-    min-width:715px;
-    padding: 10px 0 10px 10px;
-    border: 1px solid gray;
-    border-radius: 3px;
-    font-size: 14px;
+    min-width:723px;
+    padding: 0 0 10px 10px;
     
     .packages-table {
-      clear:both;
       width: 99%;
       position:relative;
+      border: 1px solid gray;
+      border-radius: 3px;
       
       .unloaded.current {
         position:relative;
@@ -264,62 +271,64 @@
       .activated {
         color: rgba(128,0,0,0.8);
       }
-      .th-installed {
-        padding: 0 3px 0 5px;
-        width: 320px;
-        height:35px;
-        .th-dot {
-          border-top:    1px solid @syntax-text-color;
-          border-bottom: 1px solid @syntax-text-color;
-        }
-        .th-pkgs {
-          position: absolute;
-          top:-6px;
-          font-weight: bold;
-        }
-        .th-ctrl-click {
-          position: absolute;
-          top:-6px;
-          left:150px;
-          font-weight: normal;
-          display: block;
-        }
-        .th-report-click {
-          position: absolute;
-          top:-6px;
-          right:4px;
-          font-weight: normal;
-          display: block;
-        }
-        .th-legend {
-          display:inline-block;
-          margin: 5px 0 0 0;
-          .legend {
+      .pkg-hdr-tr {
+        height:55px;
+        .th-installed {
+          padding: 10px 3px 0 5px;
+          width: 320px;
+          height:35px;
+          .th-dot {
+            border-top:    1px solid @syntax-text-color;
+            border-bottom: 1px solid @syntax-text-color;
+          }
+          .th-pkgs {
+            position: absolute;
+            top:6px;
+            font-weight: bold;
+          }
+          .th-ctrl-click {
+            position: absolute;
+            top:-6px;
+            left:150px;
+            font-weight: normal;
+            display: block;
+          }
+          .th-report-click {
+            position: absolute;
+            top:-6px;
+            right:4px;
+            font-weight: normal;
+            display: block;
+          }
+          .th-legend {
             display:inline-block;
-            margin: 12px 8px 0 0;
+            margin: 5px 0 0 0;
+            .legend {
+              display:inline-block;
+              margin: 12px 8px 0 0;
+            }
+          }
+          .th-enabled {
+            display:inline-block;
+          }
+          .th-cleared {
+            display:inline-block;
+            color:green;
           }
         }
-        .th-enabled {
-          display:inline-block;
+        .th-chkmrk {
+          width: 15px;
         }
-        .th-cleared {
-          display:inline-block;
-          color:green;
+        .th-fails,.th-passes {
+          position: relative;
+          min-width:80px;
+        }
+        .th-fails-label,.th-passes-label {
+          position:absolute;
+          left: 6px;
+          bottom: 0;
         }
       }
-      .th-chkmrk {
-        width: 15px;
-      }
-      .th-fails,.th-passes {
-        position: relative;
-        min-width:80px;
-      }
-      .th-fails-label,.th-passes-label {
-        position:absolute;
-        left: 6px;
-        bottom: 0;
-      }
-      
       td {
         padding: 1px 4px 1px 4px;
         border-top:    1px solid @syntax-text-color;

@@ -1,39 +1,55 @@
-<helpProblems>
-## Package Cop
+<helpHeader>
 
-*This page is the actual application, not just a help page.* You can turn off the help text on this page in the pkg configuration settings.
+Package-Cop helps find which package is causing an error, is a manager for enabling/disabling/uninstalling packages, and a testing tool for Atom package development. See the Package-Cop readme for detailed instructions for each usage.
+
+*Note: All help text like this can be hidden with the button above. The UI below is fully functional with or without this text.* 
+
+<helpProblems>
 
 ---
 
-#### Problems ...
+### Problems And Resolution
 
-Add a prb by typing its name in an empty row.  Whenever you experience that prb check the `Occurred` check-box. Check this box only when the prb happened with the currently loaded and enabled packages.  Multiple problems can be checked.  Every time you change an `Occurred` text box an entry in a database is updated with test results including what packages were enabled.
+If you are running repeated tests for one or more problems, then those problems should be added to the list below. If not skip to the next section. (If continuing, be sure to add a name to the list to show the whole UI).
 
-*Note:* You only indicate when a prb happens, not when you think a prb isn't happening. When the `Occurred` check box is not checked it doesn't mean the prb isn't present. This ensures the accuracy of the data.
+A detail box appears on the right for the selected problem. At the top of the detail box, under the problem name, the date/time of the last activity is shown.  Also shown is the current state of the problem resolution.  Specifically it shows how many packages installed have been cleared, i.e. shown to not be the cause of the problem.  The goal is to increase that number until only the package causing the problem remains.
 
-*Hint:* If you are concentrating on doing real work and not testing packages, and a prb occurs, just bring this page up, check the prb check-box, and return immediately to your work.
+The `Report Result` buttons are used to record results of tests.  The `Problem Occurred` button should be clicked immediately after the problem has been observed.  On the other hand the `Passed Test` button should only be used when a conclusive test has shown the error isn't happening.  
 
-Clicking and selecting one of the prb names also controls what test results are displayed in the Packages list below.  Deleting a prb will permanently delete all test results for that prb.
+And finally the `Edit Problem` buttons allow renaming and deleting the problem.
 
-***Table of problems goes here**
+<helpActions>
+
+---
+
+### Actions
+
+The `Enable Packages` buttons control what packages are enabled.  `All` and `None` enable/disable all packages immediately.  You can see the changes in the package list below.  `Save` stores the state of every package so it can be recalled with the `Restore` button.  It is recommended to save your preferred setup before testing.
+
+The `Test Problem (Bisect)` button immediately changes half the packages that aren't cleared yet.  By alternating between the `Report Result` buttons and this button you can rapidly increase the number of cleared packages.  This is similar to the `git --bisect` operation.  If more than two problems are in the list, another button `Test All Problems` appears which does the same bisect operation but on all problems at once.  This is usually faster that doing one problem at a time.
+
+The `Reload Atom` button restarts Atom like `ctrl-alt-R` except this Package-Cop page is auto-loaded afterwards.  The `Activate all enabled on reload` causes all enabled packages to be activated during load.  This is cleared after each use to make sure the behavior is not accidentally left on.
 
 <helpPackages>
 
-#### Packages ...
+---
 
-This is a list of all installed packages.  The `Currently Enabled` column shows the enabled state since the last load.  The `Enable` check-box controls whether the pkg will be enabled or disabled on the next reload of Atom.  The selection choices can be saved (see below) so you can experiment freely and then restore the settings.
+### Packages
 
-The columns to the right of the pkg names are test results for the prb that is selected above in the `Problems` section.  The first column is an indicator for total history of that pkg with regard to the prb.  It shows `?` when 
+The table below shows a list of all installed packages.  The leftmost column shows the name of the package along with its current live state.  The state is shown to the left of the name as either a blank space, a gray dot, or a red dot. As the legend at the top indicates, gray is loaded and red is activated
 
-The columns to the right are a history of prb events.  Only events for one prb are shown at once.  Select the prb to be displayed in the `Problems` section above. Each column represents one or more reloads of Atom. Multiple columns with the same results are combined. Each colored box is a prb occurance.  
+If the package will be loaded on the next Atom reload, i.e. enabled, then its name is in bold. `Click` on the name to enable or disable the package.  The package is immediately loaded/activated or deactivated/unloaded to match the enabled state.
 
-<helpAction>
+`Ctrl-click` on the package name to bring up its web page in an external browser or inside Atom (if the `web-browser` package is installed). `Ctrl-alt-click` will allow you to uninstall the package.
 
-#### Action Buttons
+### Test Results (optional)
 
-<helpMethodology>
+The columns to the right of the package name show detailed test results that have been recorded.  They can usually be ignored but can sometimes give useful clues. 
 
-#### Test Methodology
+The first column shows a green checkmark if the package has been "cleared" of the problem selected above in the `Problems And Resolution` section. The `Failed Reports` and `Passed Reports` columns also apply only to this problem.  On each click of the `Problem Occurred` button in that section a new column of dashes and dots will appear in the failed column and likewise the `Passed Test` button will cause them to appear in the passed column.
 
+Each dash/dot matches what was to the left of the package name when the report was made, i.e. the state of the package.  A dash is the same as a blank space.
+
+When you `hover` over a dot/dash the time the report was made is shown.  If you `click` on one the entire report (column of dashes/dots) may be deleted from the record.
 
 <end>

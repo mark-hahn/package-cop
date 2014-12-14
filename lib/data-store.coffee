@@ -32,6 +32,8 @@ class DataStore
       @saveDataStore()
     res
     
+  getHideHelpFlag: -> @reload(); @hideHelpFlag
+    
   reload: (firstLoad) ->
     data = try
       JSON.parse fs.readFileSync dataPath, 'utf8'
@@ -51,9 +53,14 @@ class DataStore
     
     @reloadActivateFlag          = data.reloadActivateFlag
     @reloadedFromThisPackageFlag = data.reloadedFromThisPackageFlag
+    @hideHelpFlag                = data.hideHelpFlag
   
   getProblems: -> @problems
   getPackages: -> @packages
+  
+  setHideHelpFlag: (val) -> 
+    @hideHelpFlag = val
+    @saveDataStore()
   
   setReloadActivateFlag: (val) -> 
     @reloadActivateFlag = val
@@ -64,8 +71,13 @@ class DataStore
     @saveDataStore()
     
   saveDataStore: ->
-    data = {@problems, packages: {}, \
-            @reloadActivateFlag, @reloadedFromThisPackageFlag}
+    data = {
+      @problems
+      packages: {}
+      @reloadActivateFlag
+      @reloadedFromThisPackageFlag
+      @hideHelpFlag
+    }
     for packageId, pkg of @packages
       data.packages[packageId] = pkg.trimPropertiesForSave()
     try
