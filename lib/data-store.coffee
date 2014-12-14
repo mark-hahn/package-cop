@@ -7,6 +7,7 @@ pathUtil = require 'path'
 
 Problem = require './problem'
 Package = require './package'
+_       = require 'underscore'
 
 home =
   if process.platform is 'win32' then process.env.USERPROFILE
@@ -78,6 +79,7 @@ class DataStore
       @reloadedFromThisPackageFlag
       @hideHelpFlag
     }
+    console.log '_.size data.problems', _.size data.problems
     for packageId, pkg of @packages
       data.packages[packageId] = pkg.trimPropertiesForSave()
     try

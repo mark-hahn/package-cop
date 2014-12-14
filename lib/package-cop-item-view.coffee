@@ -94,7 +94,7 @@ class PackageCopItemView extends ScrollView
             @th class:'th-passes', =>
               @span class:'th-passes-label', 'Passed Reports'
               
-        @div class:'time-popup', outlet:'timePopup'
+        @div class:'time-popup hidden', outlet:'timePopup'
               
   initialize: (@packageCopItem) ->
     @subs = []
@@ -107,6 +107,10 @@ class PackageCopItemView extends ScrollView
     for problemId, prb of @problems then problemList.push prb
     problemList.sort (prba, prbb) -> prba.getLatestReportTime() - prbb.getLatestReportTime()
     for problem in problemList then @addProblemToTable problem, true
+    
+    if (_.size @problems) is 0
+      $tr = @problemsTable.find('input.new-problem-input').closest 'tr'
+      @addProblem 'Untitled', $tr
     
     setInterval =>
       helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
@@ -191,6 +195,13 @@ class PackageCopItemView extends ScrollView
     , 1000
     
     @setupEvents()
+  
+  addProblem: (name, $tr) ->
+    @currentProblem = new Problem name
+    @problems[@currentProblem.problemId] = @currentProblem
+    @packageCopItem.saveDataStore()
+    @addProblemToTable @currentProblem
+    @selectProblem $tr
   
   addProblemToTable: (prb, reverse) -> 
     $tr = @problemsTable.find 'tr:last'
@@ -418,17 +429,12 @@ class PackageCopItemView extends ScrollView
     @subs.push  @helpBtn.on 'click', =>
       hideHelp = @setHelpBtn yes
       @packageCopItem.setHideHelpFlag hideHelp
-    
+      
     @subs.push @problemsTable.on 'keypress', 'input.new-problem-input', (e) => 
       if e.which is 13
-        $tr = $(e.target).closest 'tr'
-        if ($inp = $tr.find 'input').length
-          if (name = @getProblemName $inp)
-            @currentProblem = new Problem name
-            @problems[@currentProblem.problemId] = @currentProblem
-            @packageCopItem.saveDataStore()
-            @addProblemToTable @currentProblem
-            @selectProblem $tr
+        $inp = $ e.target
+        if (name = @getProblemName $inp)
+          @addProblem name, $inp.closest 'tr'
         false
 
     @subs.push @problemsTable.on 'click', 'tr', (e) =>
@@ -509,14 +515,15 @@ class PackageCopItemView extends ScrollView
       $tgt = $ e.target
       timeMoment = moment +$tgt.attr 'data-reportid'
       pos = $tgt.position()
-      @timePopup.show().css left: pos.left-100, top: pos.top-15
+      @timePopup.css left: pos.left-100, top: pos.top-15
+                .removeClass 'hidden'
                 .html \
                   timeMoment.format('ddd')                 + '&nbsp; &nbsp;' +
                   timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
                   timeMoment.fromNow()
-      setTimeout (=> @timePopup.hide()), 2500
+      setTimeout (=> @timePopup.addClassHidden), 2500
     @subs.push @packagesTable.on 'mouseout', 'span.report', =>
-      @timePopup.hide()
+      @timePopup.addClass 'hidden'
       
     @subs.push @packagesTable.on 'click', 'span.report', (e) =>
       $tgt = $ e.target

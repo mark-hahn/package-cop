@@ -10,7 +10,7 @@ Package-Cop helps find which package is causing an error, is a manager for enabl
 
 ### Problems And Resolution
 
-If you are running repeated tests for one or more problems, then those problems should be added to the list below. If not skip to the next section. (If continuing, be sure to add a name to the list to show the whole UI).
+If you are running repeated tests for one or more problems, then those problems should be added to the list below. If not skip to the next section.
 
 A detail box appears on the right for the selected problem. At the top of the detail box, under the problem name, the date/time of the last activity is shown.  Also shown is the current state of the problem resolution.  Specifically it shows how many packages installed have been cleared, i.e. shown to not be the cause of the problem.  The goal is to increase that number until only the package causing the problem remains.
 
