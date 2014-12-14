@@ -158,14 +158,17 @@ class Package
                     atom.packages.unloadPackage @name
                   catch e
                     @fail e, 'unload'
-  activate:   -> if not @oldVersion and @name isnt 'Atom' and not @activated()
-                  @load()
-                  try
-                    pack = atom.packages.getLoadedPackage @name
-                    pack.activationDeferred ?= resolve:(->), reject:(->)
-                    pack.activateNow()
-                  catch e
-                    @fail e, 'activate'
+  activate:   -> if not @oldVersion and @name isnt 'Atom'
+                  setTimeout =>
+                    if not @activated()
+                      @load()
+                      try
+                        pack = atom.packages.getLoadedPackage @name
+                        pack.activationDeferred ?= resolve:(->), reject:(->)
+                        pack.activateNow()
+                      catch e
+                        @fail e, 'activate'
+                  , 100
   deactivate: -> if not @oldVersion and @name isnt 'Atom' and @activated()
                   try
                     atom.packages.deactivatePackage @name
