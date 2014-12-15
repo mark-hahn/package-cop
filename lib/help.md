@@ -14,7 +14,7 @@ If you are running repeated tests for one or more problems, then those problems 
 
 A detail box appears on the right for the selected problem. At the top of the detail box, under the problem name, the date/time of the last activity is shown.  Also shown is the current state of the problem resolution.  Specifically it shows how many packages installed have been cleared, i.e. shown to not be the cause of the problem.  The goal is to increase that number until only the package causing the problem remains.
 
-The `Report Result` buttons are used to record results of tests.  The `Problem Occurred` button should be clicked immediately after the problem has been observed.  On the other hand the `Passed Test` button should only be used when a conclusive test has shown the error isn't happening.  
+The `Report Result` buttons are used to record results of tests.  The `Problem Occurred` button should be clicked immediately after the problem has been observed.  On the other hand the `Test Passed` button should only be used when a conclusive test has shown the error isn't happening.  
 
 And finally the `Edit Problem` buttons allow renaming and deleting the problem.
 
@@ -46,7 +46,7 @@ If the package will be loaded on the next Atom reload, i.e. enabled, then its na
 
 The columns to the right of the package name show detailed test results that have been recorded.  They can usually be ignored but can sometimes give useful clues. 
 
-The first column shows a green checkmark if the package has been "cleared" of the problem selected above in the `Problems And Resolution` section. The `Failed Reports` and `Passed Reports` columns also apply only to this problem.  On each click of the `Problem Occurred` button in that section a new column of dashes and dots will appear in the failed column and likewise the `Passed Test` button will cause them to appear in the passed column.
+The first column shows a green checkmark if the package has been "cleared" of the problem selected above in the `Problems And Resolution` section. The `Failed Reports` and `Passed Reports` columns also apply only to this problem.  On each click of the `Problem Occurred` button a new column of dashes and dots will appear in the failed column and likewise the `Test Passed` button will cause them to appear in the passed column.
 
 Each dash/dot matches what was to the left of the package name when the report was made, i.e. the state of the package.  A dash is the same as a blank space.
 

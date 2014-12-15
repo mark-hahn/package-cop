@@ -168,7 +168,7 @@ class Package
                         pack.activateNow()
                       catch e
                         @fail e, 'activate'
-                  , 100
+                  , 500
   deactivate: -> if not @oldVersion and @name isnt 'Atom' and @activated()
                   try
                     atom.packages.deactivatePackage @name

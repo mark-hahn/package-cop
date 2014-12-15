@@ -41,13 +41,12 @@ class PackageCopItemView extends ScrollView
             @div class: 'problem-hdr-summary', =>
               @div class: 'last-report', outlet: 'lastReport'
               @div class: 'resolution', =>
-                @span class: 'cleared',    outlet: 'cleared'
-                @span class: 'conflicted', outlet: 'conflicted'
+                @span class: 'cleared', outlet: 'cleared'
               
           @div class: 'report-result', =>
             @div class: 'report-result-hdr', 'Report Result:'
             @div class: 'btn native-key-bindings problem-report fail', 'Problem Occurred'
-            @div class: 'btn native-key-bindings problem-report pass', 'Passed Test'
+            @div class: 'btn native-key-bindings problem-report pass', 'Test Passed'
             
           @div class:'edit-problem', outlet:'editProblem', =>
             @div class: 'problem-edit-hdr', 'Edit Problem:'

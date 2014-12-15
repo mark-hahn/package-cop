@@ -1,45 +1,76 @@
 # Package-Cop
 
-Atom editor: Find pkg causing an error by logging errors
+Atom editor: Find package causing an error and more.
 
-This is not ready for use.  Development has barely started.  This is being published for discussion and to claim the name `package-cop`.  
+**Looking for the 1 of 70 packages causing double typing ...**
 
-### Status
+![Image inserted by Atom editor package auto-host-markdown-image](http://i.imgur.com/BqmnoUb.gif)
 
-You can run this pkg now but only help will appear, although the help implementation is interesting in how it uses markdown to generate the HTML of the actual application.
+### Usage Scenarios
 
-### Planned Features (2014-11-26)
+- Isolate package causing error with fast dedicated testing
+  - Enables and disables packages like a binary search or `git bisect`
+  - Testing usually does not require reloading Atom
+  - Only two clicks per test
+  
+- Logging errors and casual testing
+  - Just click when a problem happens, doesn't disturb workflow
+  - On each test-report the state of every package is recorded
+  - All history can be seen in one table
 
-I'm including notes from `discuss.atom.io` which cover most of the planned functionailty.  
+- Manage packages
+  - Enable and disable packages with one click
+  - View current loaded/activated state
+  
+- Package development aid
+  - Reload package without reloading Atom
+  - Test activation and deactivation
 
----
+### Installation
 
-I'm working on a pkg that accomplishes two things, both related to enabling and disabling installed packages. 
+Use the settings page to find and install `package-cop` or type `atom install package-cop`.
 
-First it provides a list of your installed packages and each one can be toggled between enabled and disabled with a click on the name. Secondly it provides a built-in algorithm, similar to a git bisect, that enables a set of packages for each reload to find what pkg is causing an error.
+### Open the Package-Cop page
 
----
+The entire UI is in one page in one tab. The command `package-cop:open` brings up this page.  The key combination `ctrl-alt-P` is bound to this command by default.
 
-This pkg spec is evolving rapidly as I work on it ...
+### Detailed UI description
 
-It now serves a third purpose as a general purpose logger. It logs the test results over time and you don't really have to be doing an "active" test to make use of it.
+Turn on help using the button at the top right of the package-cop page to see inline text decribing all UI features. That help is not duplicated here.  Note that the UI is fully functional when it is embedded in the help text.
 
-- You can blindly enable whatever packages you want, do your normal workflow, and only have to deal with this utility when an error happens and you log the error. Then you can go back to work with little interruption..The log can later be processed by an inference logic engine.
+### Using safe mode
 
-- Logging is also good for reporting. You can say bug foo happened the first time when pkg bar changed to version X. This "coincidence" checking is a different kind of analysis from bisection.
+Whenever you run into a problem, restart Atom in safe mode with the command `atom --safe`.  If the problem persists in safe mode then submit an issue to https://github.com/atom/atom.    This package will not help you in that situation.
+  
+### Isolate package causing error with fast dedicated testing
 
-- I'm going to monitor whether a pkg was activated when the error happened, not just if it was enabled. I may only consider activated pkg status for inclusion in the test data.
+Detailed instructions (same as video above) ...
 
-- I'm going to consider every version of a pkg as a separate entity in the inference logic. I'm also including each version of Atom in the test data like pkg data. The Atom version is a very significant variable.
+- When you see an error, open the package-cop page and click `Problem Occurred` and then `Test Problem (Bisect)`.  You will now see green checkmarks for each problem cleared, i.e. known to not cause the problem.
 
-- I'm allowing one to register and track multiple problems as they happen. This means the multiple problems can share test state and get more utility out of each reload.
+- Repeat the test, bring up the package-cop page, and click on `Problem Occurred` or `Test Passed`.  Click on `Test Problem (Bisect)` again.
 
-- I've also got some ideas that enhance the testing not just passively monitor it.
+- Repeat the last step multiple times and observe the results shown in the box in the upper right.  They will look like `Packages Cleared: 38/70, 52%`. You will see the progress as more packges are cleared.  When finished you should see `Package causing problem: some-evil-package` in red.  
 
-  - One trick is to force all packages to be activated at load. This   will slow down load time and other operations but should increase the chances of breaking it which helps.
+- If you see `Packages Cleared: 70/70, 100%` in red then the overall process failed. If that happens you should start with a new problem name and after each time you click `Test Problem (Bisect)` then click on `Reload Atom`.  After the reload you will see the package-cop page again.  Repeat the test reloading Atom each time.
 
-  - Some serious breakage can be done by using fuzz-busting. In other words randomly and rapidly fire off commands (being careful to protect stuff).
+- If it still fails you can select the checkbox `Activate all enabled on reload` before you click on `Reload Atom`.  This will cause all packages to activate immediately upon reload and improve the accuracy of testing.
 
-  - Fuzz busting would also be a good for acceptance testing of a single pkg.
+- If this still doesn't work then the problem is too complex for this method.  Maybe it relies on two packages being loaded at once.  In this case you can look at the report results on the right of the package list and maybe figure it out yourself.  See the page help for the meaning of that section.
 
-All this mish-mash of features will be blended together into a new type of utility that is everything having to do with monitoring packages and their problems. In other words it does one thing but has a tool-belt of different tools.
+### Logging errors and casual testing
+
+If you are using the editor and a problem occurs, you don't have to stop immediately to test it.  Just bring up the package-cop page, enter a problem name, and click on `Problem Occurred`.  You can then go back to work.  You can do this every time the problem occurs and it only takes one click after the first time.
+
+This not only creates a log of the problems, but it also calculates which packages are cleared with whatever information it has.  Green marks will appear for each cleared package.  If you enable and disable packages every so often then more packages will be cleared.  You may find the cause without ever doing specific testing.
+
+This can be done for multiple projects by clicking on the problem name before reporting the error.
+
+### Test report buttons
+
+You might have noticed the fail button is labeled `Problem Occurred` instead of `Test Failed` to match the button `Test Passed`.  This is because reporting a failure is fundamentally different than passing a specific test.  It may be surprising but you can isolate a bad package without ever using `Test Passed`.  While this may be slower it will be more accurate since you never know with complete confidence a test is accurate.  But you do know exctly when a problem occurs.
+
+### License
+
+Package-Cop is copyright Mark Hahn using the MIT license.
+
