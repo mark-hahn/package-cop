@@ -2,7 +2,7 @@
   "name": "package-cop",
   "main": "./lib/package-cop",
   "version": "0.1.0",
-  "description": "Find pkg causing an error by logging errors",
+  "description": "Find package causing an error by logging errors",
   "repository": "https://github.com/mark-hahn/package-cop",
   "license": "MIT",
   "engines": {

@@ -32,7 +32,7 @@ Use the settings page to find and install `package-cop` or type `atom install pa
 
 ### Open the Package-Cop page
 
-The entire UI is in one page in one tab. The command `package-cop:open` brings up this page.  The key combination `ctrl-alt-P` is bound to this command by default.
+The entire UI is in one page in one tab. The command `package-cop:open` brings up this page.  The key combination `ctrl-F12` is bound to this command by default.
 
 ### Detailed UI description
 
@@ -68,7 +68,7 @@ This can be done for multiple projects by clicking on the problem name before re
 
 ### Test report buttons
 
-You might have noticed the fail button is labeled `Problem Occurred` instead of `Test Failed` to match the button `Test Passed`.  This is because reporting a failure is fundamentally different than passing a specific test.  It may be surprising but you can isolate a bad package without ever using `Test Passed`.  While this may be slower it will be more accurate since you never know with complete confidence a test is accurate.  But you do know exctly when a problem occurs.
+You might have noticed the fail button is labeled `Problem Occurred` instead of `Test Failed` to match the button `Test Passed`.  This is because reporting a failure is fundamentally different than passing a specific test.  It may be surprising but you can isolate a bad package without ever using `Test Passed`.  While this may be slower it will be more accurate since you never know with complete confidence a test is accurate.  But you do know exactly when a problem occurs.
 
 ### License
 
