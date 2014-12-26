@@ -12,7 +12,6 @@ module.exports =
     @dataStore = new DataStore
 
     atom.packages.onDidActivateAll =>
-      console.log 'onDidActivateAll'
       @dataStore.chkReloadActivateFlag()
     
     if @dataStore.chkReloadedFromThisPackage() 
@@ -44,5 +43,5 @@ module.exports =
     @dataStore.getHideHelpFlag()
 
   deactivate: ->
-    @packageCopItem.destroy()
+    @packageCopItem?.destroy()
     

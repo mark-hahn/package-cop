@@ -121,7 +121,7 @@ class PackageCopItemView extends ScrollView
                     name: 'Atom', version: atom.getVersion()
                     homepage: 'http://atom.io'}
       {name, version, homepage, repository, theme} = metadata
-      if name is 'package-cop' or theme or
+      if name is 'package-cop' or theme or not name or not version or 
          atom.packages.isBundledPackage name then continue
       packageId = Package.packageIdFromNameVersion name, version
       @packages[packageId] ?= new Package name, version
