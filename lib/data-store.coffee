@@ -48,7 +48,7 @@ class DataStore
     @packages ?= {}
     for packageId, packageData of data.packages
       @packages[packageId] = new Package packageData
-    @packages = Package.removeUninstalled @packages
+    Package.removeUninstalled @packages
     
     @reloadActivateFlag          = data.reloadActivateFlag
     @reloadedFromThisPackageFlag = data.reloadedFromThisPackageFlag
@@ -91,6 +91,4 @@ class DataStore
         message: 'package-cop: error saving data'
         detailedMessage: e.message
         buttons: ['OK']
-  
     
-  

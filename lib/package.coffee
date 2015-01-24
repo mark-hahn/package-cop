@@ -47,11 +47,9 @@ class Package
     title
     
   @removeUninstalled = (packages) ->
-    packagesOut = {}
     allNames = atom.packages.getAvailablePackageNames().concat 'Atom'
-    for id, pkg of packages when pkg.name in allNames
-      packagesOut[id] = pkg
-    packagesOut
+    for id, pkg of packages
+      if pkg.name not in allNames then delete packages[id]
     
   constructor: (@name, @version) ->
     if typeof @name is 'object'
