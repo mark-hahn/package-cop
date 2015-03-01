@@ -1,0 +1,1 @@
+Several packages call deactivate and activate on other packages for various reasons.  When deactivate is called on this package some things are not cleaned up.  Deactivate should reverse all changes to Atom caused by activate.

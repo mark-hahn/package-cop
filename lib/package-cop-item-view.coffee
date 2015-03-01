@@ -3,7 +3,7 @@
 ###
 
 fs = require 'fs'
-
+SubAtom  = require 'sub-atom'
 pathUtil = require 'path'
 {$,ScrollView} = require 'atom'
 marked = require 'marked'
@@ -96,7 +96,7 @@ class PackageCopItemView extends ScrollView
         @div class:'time-popup hidden', outlet:'timePopup'
               
   initialize: (@packageCopItem) ->
-    @subs = []
+    @subs = new SubAtom
     @problems = @packageCopItem.getProblems()
     @packages = @packageCopItem.getPackages()
     @reports  = null
@@ -423,23 +423,23 @@ class PackageCopItemView extends ScrollView
     hide
     
   setupEvents: ->
-    @subs.push  @helpBtn.on 'click', =>
+    @subs.add  @helpBtn, 'click', =>
       hideHelp = @setHelpBtn yes
       @packageCopItem.setHideHelpFlag hideHelp
       
-    @subs.push @problemsTable.on 'keypress', 'input.new-problem-input', (e) => 
+    @subs.add @problemsTable, 'keypress', 'input.new-problem-input', (e) => 
       if e.which is 13
         $inp = $ e.target
         if (name = @getProblemName $inp)
           @addProblem name, $inp.closest 'tr'
         false
 
-    @subs.push @problemsTable.on 'click', 'tr', (e) =>
+    @subs.add @problemsTable, 'click', 'tr', (e) =>
       $tr = $(e.target).closest 'tr'
       if $tr.hasClass 'problem-name'
         @selectProblem $tr
         
-    @subs.push @problemDetail.on 'click', '.problem-report', (e) =>
+    @subs.add @problemDetail, 'click', '.problem-report', (e) =>
       failed = $(e.target).hasClass 'fail'
       reportId = Date.now()
       @currentProblem.addReport reportId, failed
@@ -457,10 +457,10 @@ class PackageCopItemView extends ScrollView
       @packageCopItem.saveDataStore()
       @updateChecked()
 
-    @subs.push @problemDetail.on 'click', '.problem-rename', =>
+    @subs.add @problemDetail, 'click', '.problem-rename', =>
       @renameSelectedProblem()
 
-    @subs.push @renameInput.on 'keypress', (e) => 
+    @subs.add @renameInput, 'keypress', (e) => 
       if e.which is 13
         if (name = @getProblemName $(e.target), yes)
           @problemsTable.find('tr.selected td').text name
@@ -470,26 +470,26 @@ class PackageCopItemView extends ScrollView
         @cancelProblemRename()
         false
 
-    @subs.push @renameInput.on 'blur', => @cancelProblemRename()
+    @subs.add @renameInput, 'blur', => @cancelProblemRename()
     
-    @subs.push @problemDetail.on 'click', '.problem-delete', =>
+    @subs.add @problemDetail, 'click', '.problem-delete', =>
       @deleteSelectedProblem()
       
-    @subs.push @enablePackages.on 'click', '.btn-sel-all',       => @enableAllSetup()
-    @subs.push @enablePackages.on 'click', '.btn-sel-none',      => @enableNoneSetup()
-    @subs.push @enablePackages.on 'click', '.btn-sel-save',      => @enableSaveSetup()
-    @subs.push @enablePackages.on 'click', '.btn-sel-restore',   => @enableRestoreSetup()
-    @subs.push @enablePackages.on 'click', '.btn-sel-auto-all',  => @enableAutoSetup yes
-    @subs.push @enablePackages.on 'click', '.btn-sel-auto',      => @enableAutoSetup no
+    @subs.add @enablePackages, 'click', '.btn-sel-all',       => @enableAllSetup()
+    @subs.add @enablePackages, 'click', '.btn-sel-none',      => @enableNoneSetup()
+    @subs.add @enablePackages, 'click', '.btn-sel-save',      => @enableSaveSetup()
+    @subs.add @enablePackages, 'click', '.btn-sel-restore',   => @enableRestoreSetup()
+    @subs.add @enablePackages, 'click', '.btn-sel-auto-all',  => @enableAutoSetup yes
+    @subs.add @enablePackages, 'click', '.btn-sel-auto',      => @enableAutoSetup no
     
     @reloadActivateChkbox.on 'change', (e) =>
       @packageCopItem.setReloadActivateFlag $(e.target).is ':checked'
       
-    @subs.push @reloadAtom.on 'click', => 
+    @subs.addh @reloadAtom, 'click', => 
       @packageCopItem.setReloadedFromThisPackageFlag yes
       $('body').trigger 'window:reload'
   
-    @subs.push @packagesTable.on 'click', 'td.dotname', (e) =>
+    @subs.add @packagesTable, 'click', 'td.dotname', (e) =>
       $tr = $(e.target).closest('tr')
       packageId = $tr.attr 'data-packageId'
       if not packageId then return
@@ -508,7 +508,7 @@ class PackageCopItemView extends ScrollView
       if not pkg.getOldVersion() and pkg.name isnt 'Atom'
         @enableDisablePackage pkg, not pkg.getEnabled()
         
-    @subs.push @packagesTable.on 'mouseover', 'span.report', (e) =>
+    @subs.add @packagesTable, 'mouseover', 'span.report', (e) =>
       $tgt = $ e.target
       timeMoment = moment +$tgt.attr 'data-reportid'
       pos = $tgt.position()
@@ -519,10 +519,10 @@ class PackageCopItemView extends ScrollView
                   timeMoment.format('YYYY-MM-DD HH:mm:ss') + '&nbsp; &nbsp;' + 
                   timeMoment.fromNow()
       setTimeout (=> @timePopup.addClassHidden), 2500
-    @subs.push @packagesTable.on 'mouseout', 'span.report', =>
+    @subs.add @packagesTable, 'mouseout', 'span.report', =>
       @timePopup.addClass 'hidden'
       
-    @subs.push @packagesTable.on 'click', 'span.report', (e) =>
+    @subs.add @packagesTable, 'click', 'span.report', (e) =>
       $tgt = $ e.target
       reportId = $tgt.attr 'data-reportid'
       timeMoment = moment +reportId
@@ -541,7 +541,5 @@ class PackageCopItemView extends ScrollView
   destroy: ->
     if @chkActivatedInterval 
       clearInterval @chkActivatedInterval
-    for sub in @subs 
-      sub.off?()
-      sub.unsubscribe?()
+    @subs.dispose()
       
