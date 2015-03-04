@@ -1,17 +1,18 @@
 {
   "name": "package-cop",
   "main": "./lib/package-cop",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Find package causing an error by logging errors",
   "repository": "https://github.com/mark-hahn/package-cop",
   "license": "MIT",
   "engines": {
-    "atom": ">0.150.0"
+    "atom": ">0.170.0"
   },
   "dependencies": {
     "emissary": "*",
     "marked":   "0.3.1",
     "moment":   ">=2.7.0",
-    "underscore": "*"
+    "underscore": "*",
+    "sub-atom": "*"
   }
 }

@@ -87,11 +87,11 @@ class Package
     
   openURL: ->
     url = @repoURL ? 'https://atom.io/packages/' + @name
-    if atom.webBrowser
-      atom.webBrowser.createPage url
+    if atom.packages.isPackageLoaded 'web-browser'
+      atom.workspace.open url
     else
       shell.openExternal url
-      
+
   setOldVersion: -> @oldVersion = yes
   getOldVersion: -> @oldVersion
   

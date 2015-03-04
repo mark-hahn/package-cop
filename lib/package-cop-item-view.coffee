@@ -178,7 +178,7 @@ class PackageCopItemView extends ScrollView
     @selectProblem()
 
     @chkActivatedInterval = setInterval =>
-      for packageId, pkg of @packages
+      for packageId, pkg of @packages when pkg.$tr
         if (state = pkg.getStateIfChanged())
           $dot = pkg.$tr.find '.dot.current'
           $dot.removeClass 'unloaded'
@@ -485,7 +485,7 @@ class PackageCopItemView extends ScrollView
     @reloadActivateChkbox.on 'change', (e) =>
       @packageCopItem.setReloadActivateFlag $(e.target).is ':checked'
       
-    @subs.addh @reloadAtom, 'click', => 
+    @subs.add @reloadAtom, 'click', => 
       @packageCopItem.setReloadedFromThisPackageFlag yes
       $('body').trigger 'window:reload'
   
