@@ -107,10 +107,8 @@ class PackageCopItemView extends ScrollView
     problemList.sort (prba, prbb) -> prba.getLatestReportTime() - prbb.getLatestReportTime()
     for problem in problemList then @addProblemToTable problem, true
     
-    if (_.size @problems) is 0
-      $tr = @problemsTable.find('input.new-problem-input').closest 'tr'
-      @addProblem 'Untitled', $tr
-      
+    @addUntitledProblemIfNeeded()
+    
     helpMD = fs.readFileSync pathUtil.join(__dirname, 'help.md'), 'utf8'
     regex = new RegExp '\\<([^>]+)\\>([^<]*)\\<', 'g'
     while (match = regex.exec helpMD)
@@ -192,6 +190,11 @@ class PackageCopItemView extends ScrollView
     , 1000
     
     @setupEvents()
+    
+  addUntitledProblemIfNeeded: ->
+    if (_.size @problems) is 0
+      $tr = @problemsTable.find('input.new-problem-input').closest 'tr'
+      @addProblem 'Untitled', $tr
   
   addProblem: (name, $tr) ->
     @currentProblem = new Problem name
@@ -243,6 +246,7 @@ class PackageCopItemView extends ScrollView
       @packageCopItem.saveDataStore()
       $tr.remove()
       @selectProblem()
+      @addUntitledProblemIfNeeded()
       
   setLastReport: -> 
     if (time = @currentProblem.getLatestReportTime())
@@ -256,6 +260,7 @@ class PackageCopItemView extends ScrollView
       @lastReport.hide()
   
   selectProblem: ($tr) ->
+    @addUntitledProblemIfNeeded()
     $trs = @problemsTable.find('tr')
     $trs.removeClass 'selected'
     @enablePackagesBtns.removeClass 'no-problem'
