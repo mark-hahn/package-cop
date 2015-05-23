@@ -3,6 +3,7 @@
 ###
 
 fs = require 'fs'
+util = require 'util'
 SubAtom  = require 'sub-atom'
 pathUtil = require 'path'
 {$,ScrollView} = require 'atom'
@@ -291,12 +292,14 @@ class PackageCopItemView extends ScrollView
       states.push [reportId, failed]
     states.sort()
     for packageId, pkg of @packages
-      $tr = pkg.$tr
-      $tr.find('.fails-dot,.passes-dot').remove()
-      for state in states
-        [reportId, failed] = state
-        state = pkg.getStates()[reportId] ? 'no-state'
-        @addReportDot $tr, failed, state, reportId
+      if not ($tr = pkg.$tr)
+        console.log 'Package-cop selectProblem, pkg:', util.inspect pkg, depth: null
+      else
+        $tr.find('.fails-dot,.passes-dot').remove()
+        for state in states
+          [reportId, failed] = state
+          state = pkg.getStates()[reportId] ? 'no-state'
+          @addReportDot $tr, failed, state, reportId
 
   updateChecked: (clearChecks) ->
     @packagesTable.find('.check')
@@ -356,9 +359,11 @@ class PackageCopItemView extends ScrollView
 
   enableDisablePackage: (pkg, enable) ->
     pkg.enableDisable enable
-    $name = pkg.$tr.find '.name'
-    if enable then $name.addClass('enabled') else $name.removeClass('enabled')
-
+    if pkg.$tr
+      $name = pkg.$tr.find '.name'
+      if enable then $name.addClass('enabled') else $name.removeClass('enabled')
+    else console.log 'Package-cop enableDisablePackage, pkg:', util.inspect pkg, depth: null
+      
   enableAllSetup: -> 
     for packageId, pkg of @packages
       @enableDisablePackage pkg, yes

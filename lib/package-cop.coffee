@@ -1,14 +1,15 @@
 
 # lib/package-cop.coffee
 
-fs = require 'fs'
-
+fs             = require 'fs'
+SubAtom        = require 'sub-atom'
 PackageCopItem = require './package-cop-item'
 DataStore      = require './data-store'
 
 module.exports =
     
   activate: -> 
+    @subs      = new SubAtom
     @dataStore = new DataStore
 
     atom.packages.onDidActivateAll =>
@@ -17,7 +18,7 @@ module.exports =
     if @dataStore.chkReloadedFromThisPackage() 
       setTimeout (=>@openItem()), 100
       
-    atom.workspaceView.command 'package-cop:open', => @openItem()
+    @subs.add atom.commands.add 'atom-workspace', 'package-cop:open': => @openItem()
     
   openItem: ->
       @dataStore.reload yes
@@ -44,4 +45,5 @@ module.exports =
 
   deactivate: ->
     @packageCopItem?.destroy()
+    @subs.dispose()
     
