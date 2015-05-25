@@ -76,7 +76,7 @@ class Package
       buttons: ['Cancel', 'Uninstall']
     if uninstall is 0 then return false
     try
-      console.log execSync 'apm uninstall ' + @name, encoding: 'utf8'
+      execSync 'apm uninstall ' + @name, encoding: 'utf8'
     catch e
       atom.confirm
         message: 'Package Cop: Error During Uninstall\n'

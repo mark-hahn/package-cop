@@ -9,10 +9,12 @@ DataStore      = require './data-store'
 module.exports =
     
   activate: -> 
+    # console.log 'activate p cop'
+    
     @subs      = new SubAtom
     @dataStore = new DataStore
 
-    atom.packages.onDidActivateAll =>
+    @subs.add atom.packages.onDidActivateInitialPackages =>
       @dataStore.chkReloadActivateFlag()
     
     if @dataStore.chkReloadedFromThisPackage() 
@@ -28,7 +30,7 @@ module.exports =
           if item instanceof PackageCopItem 
             pane.destroyItem item
       @packageCopItem = new PackageCopItem @
-      workspace.activePane.activateItem @packageCopItem
+      workspace.getActivePane().activateItem @packageCopItem
       
   getProblems:   -> @dataStore.getProblems()
   getPackages:   -> @dataStore.getPackages()

@@ -34,6 +34,8 @@ class DataStore
     res
     
   reload: (firstLoad) ->
+    # console.log 'start reload'
+    
     data = try
       JSON.parse fs.readFileSync dataPath, 'utf8'
     catch e
@@ -54,6 +56,8 @@ class DataStore
     @reloadedFromThisPackageFlag = data.reloadedFromThisPackageFlag
     @hideHelpFlag                = data.hideHelpFlag
     @saveDataStore()
+    
+    # console.log 'end reload'
   
   getProblems: ->
     @problems

@@ -6,7 +6,8 @@ fs = require 'fs'
 util = require 'util'
 SubAtom  = require 'sub-atom'
 pathUtil = require 'path'
-{$,ScrollView} = require 'atom'
+$ = require 'jquery'
+{ScrollView} = require 'atom-space-pen-views'
 marked = require 'marked'
 moment = require 'moment'
 _      = require 'underscore'
@@ -291,15 +292,12 @@ class PackageCopItemView extends ScrollView
     for reportId, failed of @reports
       states.push [reportId, failed]
     states.sort()
-    for packageId, pkg of @packages
-      if not ($tr = pkg.$tr)
-        console.log 'Package-cop selectProblem, pkg:', util.inspect pkg, depth: null
-      else
-        $tr.find('.fails-dot,.passes-dot').remove()
-        for state in states
-          [reportId, failed] = state
-          state = pkg.getStates()[reportId] ? 'no-state'
-          @addReportDot $tr, failed, state, reportId
+    for packageId, pkg of @packages when pkg.$tr
+      $tr.find('.fails-dot,.passes-dot').remove()
+      for state in states
+        [reportId, failed] = state
+        state = pkg.getStates()[reportId] ? 'no-state'
+        @addReportDot $tr, failed, state, reportId
 
   updateChecked: (clearChecks) ->
     @packagesTable.find('.check')
@@ -307,7 +305,7 @@ class PackageCopItemView extends ScrollView
     if clearChecks then return
     
     numCleared = 0
-    for packageId, pkg of @packages
+    for packageId, pkg of @packages when pkg.$tr
       if @isCleared pkg, @currentProblem
         numCleared++
         pkg.$tr.find('.check').addClass 'cleared'
@@ -362,7 +360,7 @@ class PackageCopItemView extends ScrollView
     if pkg.$tr
       $name = pkg.$tr.find '.name'
       if enable then $name.addClass('enabled') else $name.removeClass('enabled')
-    else console.log 'Package-cop enableDisablePackage, pkg:', util.inspect pkg, depth: null
+    else console.log 'Package-cop enableDisablePackage, no pkg.$tr:', util.inspect pkg, depth: null
       
   enableAllSetup: -> 
     for packageId, pkg of @packages
@@ -380,7 +378,7 @@ class PackageCopItemView extends ScrollView
     @packageCopItem.saveDataStore()
     false
   enableRestoreSetup: ->
-    for packageId, pkg of @packages
+    for packageId, pkg of @packages when pkg.$tr
       {state, enabled} = pkg.getSavedState()
       if pkg.getState()   isnt state or
          pkg.getEnabled() isnt enabled

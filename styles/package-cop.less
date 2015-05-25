@@ -1,0 +1,395 @@
+
+@import "ui-variables";
+@import "syntax-variables";
+@import "octicon-utf-codes";
+
+.package-cop-item-view {
+  background-color: @syntax-background-color;
+  color: @syntax-text-color;
+  font-size:14px;
+  padding: 10px 20px 20px 30px;
+  overflow: scroll;
+  
+  .package-cop-hdr {
+    min-width:720px;
+    position:relative;
+    margin-bottom:15px;
+    
+    .package-cop-title {
+      width:500px;
+      font-size: 18px;
+      font-weight: bold;
+      font-style: italic;
+    }
+    .help-btn {
+      position:absolute;
+      left:639px;
+      top:0;
+    }
+  }
+  .package-cop-help {
+    width:720px;
+    font-size: 14px;
+  }
+  .package-cop-help.hidden {
+    display:none;
+  }
+  .problem-horiz {
+    position:relative;
+    width: 720px;
+    margin: 20px 0 20px 0;
+    
+    .problems-table {
+      position:relative;
+      padding:10px; 
+      border:1px solid gray;
+      border-radius: 3px;
+      width: 250px;
+      height:143px;
+      overflow:auto;
+      display: inline-block;
+      
+      table {
+        width: 200px;
+        font-size: 14px;
+        th {
+          padding: 0 0 5px 3px;
+        }
+        tr.problem-name td {
+          color: @syntax-text-color;
+          padding-left: 3px;
+          border-top:    1px solid @syntax-text-color;
+          border-bottom: 1px solid @syntax-text-color;
+        }
+        tr.problem-name:not(.selected) {
+          cursor: pointer;
+        }
+        .selected {
+          font-weight: bold;
+        }
+        input {
+          width:         200px;
+          margin-top:      5px;
+          height:         21px;
+          padding-left:    8px;
+          padding-right:   2px;
+          box-shadow:     none;
+          border-radius:   4px;
+          border: 1px solid @input-border-color;
+          color:            @text-color;
+          background-color: @input-background-color;
+        }
+      }
+    }
+    .problem-detail {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      min-width: 440px;
+      height: 143px;
+      margin-left: 25px;
+      padding: 10px; 
+      border: 1px solid gray;
+      border-radius: 3px;
+      
+      .btn {
+        margin: 4px;
+      }
+      .problem-hdr {
+        .problem-hdr-hdr {
+          border-bottom: 1px dashed gray;
+          .problem-name {
+            position:relative;
+            top:-5px;
+            font-weight: bold;
+            font-size:16px;
+          }
+        }
+        .problem-hdr-summary {
+          .all-cleared,.found-it {
+            color: red;
+          }
+        }
+      }
+      .report-result {
+        position: absolute;
+        top: 75px;
+        width:250px;
+        border-top: 1px solid gray;
+        display: inline-block;
+        padding-right:5px;
+        
+        .report-result-hdr {
+          margin-top:   3px;
+          font-weight: bold;
+        }
+        .problem-report.fail {
+          position:absolute;
+          top:23px;
+          left: 12px;
+        }
+        .problem-report.pass {
+          position:absolute;
+          top:23px;
+          left: 140px;
+        }
+      }
+      .edit-problem.rename  {
+        top: 54px;
+      }
+      .edit-problem {
+        position: absolute;
+        left:260px;
+        top: 75px;
+        width: 169px;
+        height: 57px;
+        border-top: 1px solid gray;
+        border-left: 1px solid gray;
+        padding-left:25px;
+        display: inline-block;
+        
+        .problem-edit-hdr {
+          position:absolute;
+          left:10px;
+          margin-top:3px;
+          font-weight: bold;
+        }
+        .problem-rename {
+          position:absolute;
+          top:23px;
+          left: 23px;
+        }
+        .problem-delete {
+          position:absolute;
+          top:23px;
+          left: 100px;
+        }
+        .rename-input {
+          display: none;
+        }
+        .rename-input.active {
+          display: block;
+          position:absolute;
+          top:58px;
+          left:25px;
+          width: 130px;
+        }
+      }
+    }
+  }
+  .action-horiz {
+    position:relative;
+    width:715px;
+    margin: 20px 0 20px 0;
+    
+    .btn {
+      margin:2px;
+    }
+    .enable-packages {
+      padding-left: 10px;
+      padding-right:4px;
+      height: 62px;
+      border: 1px solid gray;
+      border-radius: 3px;
+      display:inline-block;
+      .enable-packages-hdr {
+        position: relative;
+        top:2px;
+        font-weight: bold;
+      }
+      .enable-packages-btns {
+        position: relative;
+        top:2px;
+      }
+      .enable-packages-btns.no-problem {
+        .btn-sel-auto, .btn-sel-auto-all {
+          display:none;
+        }
+      }
+      .enable-packages-btns.one-problem {
+        .btn-sel-auto-all {
+          display:none;
+        }
+      }
+    }
+    .reload-atom {
+      position:absolute;
+      right:0;
+      bottom:0;
+      width:210px;
+      height:62px;
+      border: 1px solid gray;
+      border-radius: 3px;
+      
+      .reload-atom-hdr {
+        position:absolute;
+        top:2px;
+        left:4px;
+        font-weight: bold;
+      }
+      .btn {
+        position:absolute;
+        left:115px;
+        top:4px;
+      }
+      .reload-activate {
+        position:absolute;
+        top:34px;
+        left:8px;
+        .reload-activate-chkbox {
+          position:relative;
+          top:2px;
+          margin-right:2px;
+        }
+      }
+    }
+  }
+  .package-horiz {
+    position: relative;
+    min-width:723px;
+    padding: 0 0 10px 10px;
+    
+    .packages-table {
+      width: 99%;
+      position:relative;
+      border: 1px solid gray;
+      border-radius: 3px;
+      
+      .unloaded.current {
+        position:relative;
+        left:1px;
+        color: @syntax-background-color;
+      }
+      .unloaded:not(.current) {
+        position:relative;
+        left:1px;
+        color: @syntax-text-color;
+      }
+      .loaded {
+        color: rgba(128,128,128,0.5);
+      }
+      .activated {
+        color: rgba(128,0,0,0.8);
+      }
+      .pkg-hdr-tr {
+        height:55px;
+        .th-installed {
+          padding: 10px 3px 0 5px;
+          width: 320px;
+          height:35px;
+          .th-dot {
+            border-top:    1px solid @syntax-text-color;
+            border-bottom: 1px solid @syntax-text-color;
+          }
+          .th-pkgs {
+            position: absolute;
+            top:6px;
+            font-weight: bold;
+          }
+          .th-ctrl-click {
+            position: absolute;
+            top:-6px;
+            left:150px;
+            font-weight: normal;
+            display: block;
+          }
+          .th-report-click {
+            position: absolute;
+            top:-6px;
+            right:4px;
+            font-weight: normal;
+            display: block;
+          }
+          .th-legend {
+            display:inline-block;
+            margin: 5px 0 0 0;
+            .legend {
+              display:inline-block;
+              margin: 12px 8px 0 0;
+            }
+          }
+          .th-enabled {
+            display:inline-block;
+          }
+          .th-cleared {
+            display:inline-block;
+            color:green;
+          }
+        }
+        .th-chkmrk {
+          width: 15px;
+        }
+        .th-fails,.th-passes {
+          position: relative;
+          min-width:80px;
+        }
+        .th-fails-label,.th-passes-label {
+          position:absolute;
+          left: 6px;
+          bottom: 0;
+        }
+      }
+      td {
+        padding: 1px 4px 1px 4px;
+        border-top:    1px solid @syntax-text-color;
+        border-bottom: 1px solid @syntax-text-color;
+        border-right: 1px solid @syntax-text-color;
+        
+        span.name {
+          margin-left: 5px;
+        }
+        span.name:not(.old) {
+          cursor: pointer;
+        }
+        span.name.enabled {
+          font-weight: bold;
+        }
+        span.check {
+          color: @syntax-background-color;
+        }
+        span.check.cleared {
+          color: lighten(green, 10%); 
+        }
+        .fails-dot,.passes-dot {
+          cursor: pointer;
+          padding-left:5px;
+        }
+      } 
+    }
+    .time-popup {
+      position: absolute;
+      padding:0 3px 0 3px;
+      border: 1px solid gray;
+      font-size:12px;
+      background-color: @syntax-background-color;
+      box-shadow: 2px 2px;
+    }
+    .time-popup.hidden {
+        display:none;
+    }
+  }
+  
+  code {
+      background: rgba(128, 128, 128, 0.15) !important;
+      color: @syntax-text-color  !important;
+  }
+  
+  .octicon {
+    font-family: 'Octicons Regular';
+    font-size: 1.1em;
+    // color: @text-color;
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  .octicon.browser-btn:hover {
+    border: 1px solid @button-border-color;
+    background-color: @button-background-color-hover;
+  }
+  .octicon.octicon-dot   {&:before{content: @primitive-dot }}
+  .octicon.octicon-check {&:before{content: @check         }}
+}
+
+

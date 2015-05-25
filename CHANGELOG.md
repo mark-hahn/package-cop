@@ -1,5 +1,8 @@
+## 0.2.7 - 5/24/15
+* removed debug statements
+
 ## 0.2.6 - 4/23/15
-* fixed crash when problem list is empty
+* fixed deprecations
 
 ## 0.2.5 - 3/6/15
 * fixed crash when problem list is empty
