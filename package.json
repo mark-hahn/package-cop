@@ -1,7 +1,7 @@
 {
   "name": "package-cop",
   "main": "./lib/package-cop",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Find package causing an error by logging errors",
   "repository": "https://github.com/mark-hahn/package-cop",
   "license": "MIT",

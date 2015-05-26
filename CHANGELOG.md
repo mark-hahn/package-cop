@@ -1,3 +1,6 @@
+## 0.2.9 - 5/26/15
+* selectors
+
 ## 0.2.8 - 5/25/15
 * style deprecations
 
