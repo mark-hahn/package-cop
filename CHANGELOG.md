@@ -1,3 +1,6 @@
+## 0.2.8 - 5/25/15
+* style deprecations
+
 ## 0.2.7 - 5/24/15
 * removed debug statements
 
