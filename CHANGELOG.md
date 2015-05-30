@@ -1,3 +1,6 @@
+## 0.2.10 - 5/30/15
+* removed old stylesheets dir
+
 ## 0.2.9 - 5/26/15
 * selectors
 
