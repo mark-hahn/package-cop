@@ -4,7 +4,11 @@
   There is a different one of these for each pkg version
 """        
 
-shell      = require 'shell'
+shell =
+  try
+    require 'shell'
+  catch MODULE_NOT_FOUND
+    require('electron').shell
 {execSync} = require 'child_process'
 
 module.exports = 
