@@ -13,7 +13,7 @@
     "jquery": "^2.1.4",
     "marked": "0.3.1",
     "moment": ">=2.7.0",
-    "sub-atom": "^1.0.0",
+    "sub-atom": "git+https://github.com/mark-hahn/sub-atom.git#semver:^1.0.0",
     "underscore": "*"
   }
 }
